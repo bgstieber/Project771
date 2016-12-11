@@ -147,7 +147,7 @@ written in the R computing environment.
 \section{Introduction}\label{introduction}
 
 Kernel density estimation allows a data analyst to get a view of an
-estimate of the distribution from which their data may have come. The
+estimate of the density from which their data may have come. The
 univariate kernel density estimate can be used in a visualization
 setting or in a simulation setting. Furthermore, the KDE can present an
 analyst with a more refined view of the potential modality within their
@@ -228,10 +228,30 @@ interesting features of the data.
 To calculate \(\widehat{f_h}(x)\), we need to compute an estimate for
 every observation \(x_i\), based on the \(n-1\) remaining observations
 in the data. This computation requires \(n * (n-1)\) computations to
-calculate \(\widehat{f_h}(x)\). To get around such a computationally
+calculate the final estimate. To get around such a computationally
 intensive calculation, possible techniques such as linear binning and
-Fast Fourier Transforms are used (both are used in \texttt{R}'s
+Fast Fourier Transforms are used (both are implemented in \texttt{R}'s
 \texttt{density} function).
+
+Computing the kernel density estimator amounts to piling up mass around
+each \(x\), then summing the mass up over \(x_1, x_2, \ldots, x_n\).
+Figure 3 demonstrates this computation. We start with 10 i.i.d.
+observations from \(N(0,1)\), which are the red triangles in the plot.
+Using a Gaussian kernel, we compute the densities (scaled by \(1/nh\))
+for each \(x\), which are the blue curves in the plot. We then sum
+across these computations and are left with our final KDE, which is the
+black curve. We have provided plots for a large bandwidth and a small
+bandwidth, demonstrating the micro and macro effects of bandwidth
+selection.
+
+\begin{figure}
+
+{\centering \includegraphics{FinalReport_files/figure-latex/unnamed-chunk-4-1} 
+
+}
+
+\caption{Demonstration of KDE computation. Red triangles are 10 i.i.d. data points from N(0,1). Blue lines are scaled densities at each data point. Black line is final KDE. Left panel uses a large bandwidth (more smoothing), right panel uses a small bandwidth (less smoothing).}\label{fig:unnamed-chunk-4}
+\end{figure}
 
 \subsection{Evaluating the Fit of $\widehat{f}_h(x)$}
 
@@ -279,25 +299,7 @@ and integrating \(bias^2\) results in:
 
 where \(R\) is a measure of the roughness of a function g:
 
-\[R(g) = \int_{-\infty}^{\infty}g^2(z) dz.\] Table 1 contains
-information about \(\sigma_K^2\) and \(R(K)\) for the Gaussian,
-Epanechnikov, and Triangular kernels.
-
-\begin{table}[ht]
-\caption{Kernel Function Properties} % title of Table
-\centering % used for centering table
-\begin{tabular}{l l l l} % centered columns (4 columns)
-\hline\hline %inserts double horizontal lines
-Name & Function & $R(K)$ & $\sigma_K^2$ \\ [0.5ex] % inserts table
-%heading
-\hline % inserts single horizontal line
-Gaussian & $ K(z) = \phi(z)$ & $\frac{1}{2\sqrt{\pi}}$ & 1 \\ [1.5ex] % inserting body of the table
-Epanechnikov & $K(z) = \frac{3}{4}  (1 - z^2)*1(|z| <1)$ & $\frac{3}{5}$ & $\frac{1}{5}$ \\ [1.5ex]
-Triangular & $K(z)= (1 - |z|) * 1(|z| < 1)$ & $\frac{2}{3}$ & $\frac{1}{6}$ \\ [1ex] % [1ex] adds vertical space
-\hline %inserts single line
-\end{tabular}
-\label{table:kernprop} % is used to refer this table in the text
-\end{table}
+\[R(g) = \int_{-\infty}^{\infty}g^2(z) dz.\]
 
 It can also be shown that
 \(var\left(\hat{f}(x)\right) = \frac{1}{nh}f(x)R(K) + o(\frac{1}{nh})\),
@@ -317,13 +319,13 @@ MISE(h) &= \frac{R(K)}{nh} + o\left(\frac{1}{nh}\right) + \frac{1}{4}h^4 \sigma_
 \(n \rightarrow \infty\), then \(MISE(h) \rightarrow 0\).
 
 Inspection of the \(bias^2\) and \(var\) components of \(MISE(h)\) with
-respect to the bandwidth \(h\) provides an example of the oft-mentioned
-bias-variance tradeoff. Selecting a small value of \(h\) increases
-variance by producing a wiggly estimate, but reduces bias, while
-selecting a large value of \(h\) reduces the variance of the estimator,
-but increases the bias due to over-smoothing. To find an optimal value,
-we must balance the bias and variance components of \(MISE\), a typical
-theme in statistical inference.
+respect to the bandwidth \(h\) provides an example of the bias-variance
+tradeoff. Selecting a small value of \(h\) increases variance by
+producing a wiggly estimate, but reduces bias, while selecting a large
+value of \(h\) reduces the variance of the estimator, but increases the
+bias due to over-smoothing. To find an optimal value, we must balance
+the bias and variance components of \(MISE\), a typical theme in
+statistical inference.
 
 Finding an optimal bandwidth \(h_{AMISE}\), is straightforward using
 calculus (ignoring \(o\left(\frac{1}{nh} + h^4\right)\)):
@@ -339,9 +341,7 @@ h_{AMISE} &= \left(\frac{R(K)}{n\sigma_K^4R(f^{''})}\right)^{\frac{1}{5}}.
 \]
 
 All of the components of \(h_{AMISE}\) are known to us, except for
-\(R(f^{''})\). The possible choices for bandwidth depend on replacing
-\(R(f^{''})\) with some estimate, \(\widehat{R(f^{''})}\). Of
-\(R(f^{''})\), Sheather (2004, 589) states:
+\(R(f^{''})\). Of \(R(f^{''})\), Sheather (2004, 589) states:
 
 \begin{quote}
 Thus, the functional \(R(f^{''})\) is a measure of the underlying
@@ -353,6 +353,26 @@ curvature in \(f\)).
 \end{quote}
 
 \section{Bandwidth Selection}\label{bandwidth-selection}
+
+The possible choices for bandwidth depend on navigating around the fact
+that \(R(f^{''})\) is unknown. We investigate four bandwidth selection
+strategies which employ different methods to circumvent not knowing
+\(R(f^{''})\).
+
+\begin{itemize}
+\item
+  Cross validation: choose a different objective function based on
+  \(ISE\), and use a LOO cross validation estimator to find
+  \(\int \hat{f}_h f\)
+\item
+  Silverman's ROT: replace \(f\) with the \(N(0, \sigma^2)\) density
+\item
+  Sheather-Jones: empirically estimate \(f''(x)\) to find \(h\) in a
+  two-step method
+\item
+  Terrell's Maximal Smoothing: minimize \(R(f^{''})\) for a given
+  \(\sigma\)
+\end{itemize}
 
 \subsection{Unbiased Cross Validation}\label{unbiased-cross-validation}
 
@@ -386,8 +406,8 @@ UCV(h) = R(\hat{f}) - \frac{2}{n} \sum_{i = 1}^{n} \hat{f}_{-i}(x_i),
 vector \texttt{x} in \texttt{R}, a user can write \texttt{bw.ucv(x)}.
 Along with ``unbiased cross-validation'', it is sometimes referred to as
 ``least-squares cross validation'' as it minimizes the integrated
-squared error. When we refer to the bandwidth selection, we denote the
-bandwidth as \(h_{LSCV}\).
+squared error. When we refer to the cross-validated bandwidth selector,
+we denote the bandwidth as \(h_{LSCV}\).
 
 For this report, we have focused on the Gaussian kernel. \(UCV(h)\) has
 a straightforward expression (equation 10.23, Givens and Hoeting (2013,
@@ -396,8 +416,12 @@ a straightforward expression (equation 10.23, Givens and Hoeting (2013,
 
 The unbiasedness of the objective function is a nice feature, but it
 comes at the cost of imbuing \(h_{LSCV}\) with excessive variance
-(Jones, Marron, and Sheather 1992, 6). This excessive variation is
-displayed in the examples section of this report.
+(Jones, Marron, and Sheather 1992, 6). The objective function \(UCV\)
+tends to depend too heavily on the sample in hand, since it is still
+random (unlike \(MISE\), which is averaged over \emph{all} samples). The
+heavy dependence on the data in hand often leads to high variation in
+\(\hat{f}_h\). This excessive variation is displayed in the
+\emph{Examples} section of this report.
 
 \subsection{Silverman's Rule of Thumb}\label{silvermans-rule-of-thumb}
 
@@ -409,8 +433,8 @@ h_{AMISE} = \left(\frac{R(K)}{n\sigma_K^4R(f^{''})}\right)^{\frac{1}{5}}.
 \]
 
 If we choose \(f\) to be the normal density with mean 0 and variance
-\(\sigma^2\), and use a Gaussian kernel, we can express \(h_{AMISE}\)
-as:
+\(\sigma^2\), and use set \(K\) to be the Gaussian kernel, we can
+express \(h_{AMISE}\) as:
 
 \[
 \begin{aligned}
@@ -424,7 +448,7 @@ standard deviation. If the true \(f\) deviates from the features of a
 normal distribution (for instance, it is multimodal), this approximation
 may do a poor job (i.e.~it will oversmooth). A possiblity is to use the
 interquartile range, which is a more robust measure of spread. We then
-replace \(\hat{sigma}\) with
+replace \(\hat{\sigma}\) with
 \(\tilde{\sigma} = min\left[\hat{\sigma}, \frac{IQR(x)}{1.34}\right]\).
 This leads to Silverman's rule of thumb:
 
@@ -459,7 +483,7 @@ approach: empirically estimate \(R(f^{''})\). An empirical estimate of
 \end{aligned}
 \]
 
-Where \(h_0\) is another bandiwdth, different from \(h_{opt}\) (and
+Where \(h_0\) is another bandwidth, different from \(h_{opt}\) (and
 typically \(h_0 > h_{opt}\) Givens and Hoeting (2013, 336)), and \(L\)
 is a kernel function.
 
@@ -475,41 +499,43 @@ expression requires an root-finding scheme such as Newton's method.
 In simulation studies (summarized in Jones, Marron, and Sheather
 (1996)), it was seen that \(h_{SJ}\) tended to be superior to both
 \(h_{LSCV}\) and \(h_{SROT}\). In general, \(h_{SJ}\) demonstrates less
-variation than \(h_{LSCV}\) and is centered near \(h_{AMISE}\) for easy
-to estimate densities. For more difficult densities, \(h_{SJ}\) will
-overshoot \(h_{AMISE}\), but is still much smaller than \(h_{SROT}\).
-\(h_{SJ}\), then, seems to be a suitable compromise between the
-low-variance high-bias \(h_{SROT}\) and the high-variance low-bias
-\(h_{LSCV}\).
+variation than \(h_{LSCV}\) and is centered near \(h_{AMISE}\) for
+easy-to-estimate densities. For more difficult densities, \(h_{SJ}\)
+will overshoot \(h_{AMISE}\), but is still much smaller than
+\(h_{SROT}\). \(h_{SJ}\), then, seems to be a suitable compromise
+between the low-variance high-bias \(h_{SROT}\) and the high-variance
+low-bias \(h_{LSCV}\).
 
 \subsection{Terrell's Maximal Smoothing
 Principle}\label{terrells-maximal-smoothing-principle}
 
 Terrell (1990) opted for a different approach in determining an optimal
-bandwidth. Rather than focusing on finding a good estimator of \(f\) or
-\(R(f'')\) in the expression for \(h_{AMISE}\), Terrell chose to
-determine some function \(g\) that would minimize
-\(R(g'') = \int (g '' (x))^2 dx\). By minimizing \(\int (g'')^2\), we
-could determine an upper bound for \(h_{opt}\), by using \(g\) as our
-estimate for \(f\). Terrell (1990, 472) justifies using the maximally
-smoothed bandwidth, because it avoids the tendency of the undersmoothed
-density estimate to ``display features such as asymmetries and multiple
-modes that could have come about by chance''.
+bandwidth. Rather than focusing on finding a good estimator of \(f''\)
+or \(R(f'')\) in the expression for \(h_{AMISE}\), Terrell chose to find
+some density function \(g\) that would minimize
+\(R(g'') = \int (g '' (x))^2 dx\) for a given variance \(\sigma^2\). By
+minimizing \(\int (g'')^2\), we could determine an upper bound for
+\(h_{opt}\), by using \(g\) as our estimate for \(f\). Terrell (1990,
+472) justifies using the maximally smoothed bandwidth, because it avoids
+the tendency of the undersmoothed density estimate to ``display features
+such as asymmetries and multiple modes that could have come about by
+chance''.
 
 Terrell's estimate is built on the result that the
 \(beta(k + 2, k + 2)\) family minimizes \(\int (f^{(k)})^2\) for a given
 standard deviation (Terrell 1990, 471). For a kernel with variance 1
-(e.g.~the Gaussian kernel), the maximal smoothing bandiwdth is:
+(e.g.~the Gaussian kernel), the maximal smoothing bandwidth is:
 
 \[
 h_{MS} =  3 \hat \sigma \left(\frac{R(K)}{35 n} \right)^{\frac{1}{5}}.
 \]
 
 The maximal smoothing principle has an intuitive justification, and its
-ideas permeate through wider areas of statistical inference, where an
-inferential scheme should prevent an analyst from claiming features of a
-data set exist that may have arisen by pure chance alone (Terrell 1990,
-472).
+ideas permeate through wider areas of statistical inference. It would be
+desirable for an inferential scheme to prevent an analyst from claiming
+features of a data set exist that may have arisen by pure chance alone
+(Terrell 1990, 472). The maximal smoothing principle applies this idea
+to the display of kernel density estimates.
 
 In terms of kernel density estimation; however, the maximal smoothing
 principle provides only an upper bound on the optimal bandwidth.
@@ -522,15 +548,19 @@ Function}{Examples Using the kde Function}}\label{examples-using-the-kde-functio
 
 To examine the four different bandwidth selections we have investigated,
 we use four different data vectors to investigate the changes in density
-estimation as the data deviates from the normal distribution. Our main
-interest is on if the bandwidth options lead to undersmoothing or
-oversmoothing of the data.
+estimation as the data deviates from the normal distribution. Two
+vectors are simulated, and two vectors are from real data
+sets.\footnote{The \texttt{R} code used to generate the data can be
+  found on the author's Github:
+  \url{https://github.com/bgstieber/Project771/blob/master/Project\%20Files/DataGeneration.R}}
+Our main interest is on if the bandwidth options lead to undersmoothing
+or oversmoothing of the data.
 
 We plot histograms and density estimates for each of the data vectors
-using the \texttt{kde} function (source code available in appendix). The
-\texttt{kde} function takes in a data vector, and calculates
-\(h_{SROT}\), \(h_{SJ}\), \(h_{LSCV}\), and \(h_{MS}\). It then
-calculates \(\widehat{f}_h(x)\). For small data vectors
+using the \texttt{kde} function (source code available in
+\emph{Appendix}). The \texttt{kde} function takes in a data vector, and
+calculates \(h_{SROT}\), \(h_{SJ}\), \(h_{LSCV}\), and \(h_{MS}\). It
+then calculates \(\widehat{f}_h(x)\). For small data vectors
 (\(n \leq 1,000\)), \texttt{kde} will calculate the densities ``by
 hand'', using a grid of size 512. For larger data vectors, the function
 will use the \texttt{density} function in base \texttt{R}. In addition
@@ -546,14 +576,22 @@ analyst will perceive different features than another. It is important
 to present multiple density estimates, and iterate through different
 bandwidths to arrive at a more common conclusion.
 
+We include each \(\hat f_h\) on the same graph rather than allowing each
+\(\hat f_h\) to have its own panel. This strategy allows for the other
+three \(\hat f_h\)'s to act as ``reality checks'' for the \(\hat f_h\)
+of the \(h\) we are focusing on. Keeping the estimates on the same graph
+allows for effective comparisons between the \(\hat f_h\)'s.
+
+\newpage
+
 \subsection{Example 1: 300 samples from $N(2, 2^2)$}
 
 \begin{verbatim}
-## Silverman's ROT           LS CV           SJ BW            T MS 
-##           0.519           0.648           0.598           0.691
+##           LS CV            T MS           SJ BW Silverman's ROT 
+##           0.648           0.691           0.598           0.519
 \end{verbatim}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-5-1.pdf}
+\begin{center}\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-6-1} \end{center}
 
 We begin by examining \(\widehat{f}_h(x)\) for a data vector sampled
 solely from \(N(2, 2^2)\). In this case, we see that each bandwidth
@@ -563,14 +601,16 @@ perform well on this vector. In fact, it is the most aggressive
 bandwidth estimator, resulting in the smallest \(h\) value of the four.
 A \emph{best bandwidth} is not apparent from these results.
 
+\newpage
+
 \subsection{Example 2: 50/50 Mixture of $N(0, 1)$ and $N(4, 2^2)$}
 
 \begin{verbatim}
-## Silverman's ROT           LS CV           SJ BW            T MS 
-##           0.742           0.562           0.515           0.944
+##           LS CV            T MS           SJ BW Silverman's ROT 
+##           0.562           0.944           0.515           0.742
 \end{verbatim}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-6-1.pdf}
+\begin{center}\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-7-1} \end{center}
 
 Moving on to a somewhat harder density to estimate, we simulate a 50/50
 distribution coming from \(N(0,1)\) and \(N(2, 2^2)\). \(h_{SJ}\) and
@@ -580,6 +620,8 @@ but the bimodality is still somewhat detectable. \(h_{MS}\) oversmooths
 disastrously - without knowing the underlying structure of the data, it
 would not be obvious that the data came from a bimodal distribution.
 
+\newpage
+
 \subsection{Example 3: Mixture of $\Gamma(\alpha = 1, \beta = 1/20)$, $\Gamma(\alpha = 4, \beta = 1/5)$, $\Gamma(\alpha = 20, \beta = 1)$}
 
 A mixture of gamma distributions may seem like a ``toy'' example, but
@@ -587,11 +629,11 @@ the gamma distribution can be very helpful in modeling rainfall (e.g.
 Husak, Michaelsen, and Funk (2007)).
 
 \begin{verbatim}
-## Silverman's ROT           LS CV           SJ BW            T MS 
-##           2.374           1.382           2.241           4.514
+##           LS CV            T MS           SJ BW Silverman's ROT 
+##           1.382           4.514           2.241           2.374
 \end{verbatim}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-7-1.pdf}
+\begin{center}\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
 Here we see the excessive variation caused by using \(h_{LSCV}\). The
 density estimate provided by \(h_{LSCV}\) is far too wiggly to be useful
@@ -600,14 +642,16 @@ estimate than the those proposed by Silverman and Sheather and Jones, it
 seems that it is too conservative. The best bandwidth would take a value
 somewhere in the range between \(h_{SJ}\) and \(h_{MS}\).
 
+\newpage
+
 \subsection{Example 4: Old Faithful Waiting Time}
 
 \begin{verbatim}
-## Silverman's ROT           LS CV           SJ BW            T MS 
-##           3.998           2.190           2.560           5.081
+##           LS CV            T MS           SJ BW Silverman's ROT 
+##           2.190           5.081           2.560           3.998
 \end{verbatim}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-8-1.pdf}
+\begin{center}\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 Using data from Azzalini and Bowman (1990), contained in the
 \textbf{\texttt{MASS}} package, we calculate the kernel density estimate
@@ -625,6 +669,32 @@ conservative bandwidth, which is \(h_{SJ}\). Conversely, between
 bandwidth, which is \(h_{SROT}\).
 
 \section{Conclusion}\label{conclusion}
+
+In this report we have presented four options for selecting a bandwidth
+for univariate kernel density estimation. We have discussed bandwidths
+that oversmooth (\(h_{MS}\)), and bandwidths that undersmooth
+(\(h_{LSCV}\)). No universally optimal bandwidth selection has been
+found, which makes selecting a bandwidth an iterative and subjective
+process.
+
+A safe option for a novice data analyst is to use at least two
+bandwidths when analyzing the data. One bandwidth should have the
+tendency to undersmooth (e.g. \(h_{SROT}\) or \(h_{MS}\)), and another
+bandwidth should produce estiamtes that are more wiggly (e.g.
+\(h_{SJ}\), \textbf{but not \(h_{LSCV}\)}). If vizualizing is the goal
+(rather than simulation), then including a histogram will provide even
+more clarity when making density plots (note that making a histogram
+also requires selecting a bandwidth, though).
+
+In our \emph{Examples} section, we saw the devastating effects of
+oversmoothing and undersmoothing. There is a large amount of literature
+on univariate bandwidth selection, but a universally optimal bandwidth
+has yet to be found. Selecting a bandwidth results presents a
+bias-variance tradeoff to the analyst, with a good bandwidth being
+depedent on the analytical task. Sheather (2004, 596) suggests to
+``produce a family of density estimates based on a number of values of
+the bandwidth''. We agree with this suggestion, and believe it to be
+sage advice for exploratory analysis.
 
 \section{Question}\label{question}
 
@@ -711,7 +781,7 @@ interval}\label{bootstrap-percentile-interval}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-12-1.pdf}
+\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-13-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -729,7 +799,7 @@ interval}\label{bootstrap-percentile-interval}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-12-2.pdf}
+\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-13-2.pdf}
 
 \subsection{Approximate Confidence
 Interval}\label{approximate-confidence-interval}
@@ -741,7 +811,7 @@ Interval}\label{approximate-confidence-interval}
     \NormalTok{h <-}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(bw ==}\StringTok{ 'SJ'}\NormalTok{, }\KeywordTok{bw.SJ}\NormalTok{(x), }\KeywordTok{bw.nrd0}\NormalTok{(x))}
     \NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(x)}
     \NormalTok{range_x <-}\StringTok{ }\KeywordTok{range}\NormalTok{(x)}
-    \NormalTok{range_x <-}\StringTok{ }\NormalTok{range_x *}\StringTok{ }\FloatTok{1.01} \CommentTok{#wiggle room}
+    \NormalTok{range_x <-}\StringTok{ }\NormalTok{range_x +}\StringTok{ }\KeywordTok{c}\NormalTok{(-.}\DecValTok{5}\NormalTok{, .}\DecValTok{5}\NormalTok{) }\CommentTok{#wiggle room}
     \NormalTok{dens_x <-}\StringTok{ }\KeywordTok{density}\NormalTok{(x, }\DataTypeTok{from =} \NormalTok{range_x[}\DecValTok{1}\NormalTok{], }\DataTypeTok{to =} \NormalTok{range_x[}\DecValTok{2}\NormalTok{],}
                       \DataTypeTok{kernel =} \StringTok{'gaussian'}\NormalTok{, }\DataTypeTok{bw =} \NormalTok{h)}
     
@@ -777,7 +847,7 @@ Interval}\label{approximate-confidence-interval}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-14-1.pdf}
+\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-15-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -795,7 +865,7 @@ Interval}\label{approximate-confidence-interval}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-14-2.pdf}
+\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-15-2.pdf}
 
 \section{Appendix}\label{appendix}
 
@@ -823,10 +893,11 @@ Interval}\label{approximate-confidence-interval}
     \NormalTok{high_grid <-}\StringTok{ }\KeywordTok{ceiling}\NormalTok{(}\KeywordTok{max}\NormalTok{(x) +}\StringTok{ }\NormalTok{max_h *}\StringTok{ }\DecValTok{3}\NormalTok{)}
     
     
-    \KeywordTok{print}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"Silverman's ROT"} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.SROT, }\DecValTok{3}\NormalTok{), }
-            \StringTok{'LS CV'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.LSCV, }\DecValTok{3}\NormalTok{),}
+
+    \KeywordTok{print}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{'LS CV'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.LSCV, }\DecValTok{3}\NormalTok{),}
+            \StringTok{'T MS'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.MS, }\DecValTok{3}\NormalTok{),}
             \StringTok{'SJ BW'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.SJ, }\DecValTok{3}\NormalTok{),}
-            \StringTok{'T MS'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.MS, }\DecValTok{3}\NormalTok{)))}
+            \StringTok{"Silverman's ROT"} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.SROT, }\DecValTok{3}\NormalTok{)))}
     
     
     \NormalTok{if(n >}\StringTok{ }\DecValTok{1000}\NormalTok{)\{}

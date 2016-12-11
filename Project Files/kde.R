@@ -17,10 +17,10 @@ kde <- function (x, grid = 512, give_dens = FALSE)
     high_grid <- ceiling(max(x) + max_h * 3)
     
     
-    print(c("Silverman's ROT" = round(h.SROT, 3), 
-            'LS CV' = round(h.LSCV, 3),
+    print(c('LS CV' = round(h.LSCV, 3),
+            'T MS' = round(h.MS, 3),
             'SJ BW' = round(h.SJ, 3),
-            'T MS' = round(h.MS, 3)))
+            "Silverman's ROT" = round(h.SROT, 3)))
     
     
     if(n > 1000){
