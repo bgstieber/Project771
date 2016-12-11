@@ -437,7 +437,7 @@ app_var <- function(x, bw){
     h <- ifelse(bw == 'SJ', bw.SJ(x), bw.nrd0(x))
     n <- length(x)
     range_x <- range(x)
-    range_x <- range_x * 1.01 #wiggle room
+    range_x <- range_x + c(-.5, .5) #wiggle room
     dens_x <- density(x, from = range_x[1], to = range_x[2],
                       kernel = 'gaussian', bw = h)
     
