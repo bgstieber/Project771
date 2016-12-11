@@ -39,7 +39,7 @@ output:
 Minimize 
 
 $$
-UCV(h) = R\left(\widehat{f}\right) - \frac{2}{n} \sum_{i = 1}^{n} \widehat{f}_{-i}(x_i),
+UCV(h) = R\left(\widehat{f}\right) - \frac{2}{n} \sum_{i = 1}^{n} \widehat{f}_{-i}(x_i)
 $$
 instead.
 
@@ -59,7 +59,7 @@ Issue: excessive variation
 Instead of estimating $R(f^{''})$, what if we tried to minimize it? Built on the result that the $beta(k + 2, k + 2)$ family minimizes $\int (f^{(k)})^2$ for a given standard deviation.
 
 $$
-h_{MS} =  3 \hat \sigma \left(\frac{R(K)}{35 n} \right)^{\frac{1}{5}}.
+h_{MS} =  3 \hat \sigma \left(\frac{R(K)}{35 n} \right)^{\frac{1}{5}}
 $$
 Issue: upper bound on $h_{opt}$ $\rightarrow$ oversmooths interesting features of the data
 
