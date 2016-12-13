@@ -582,6 +582,14 @@ three \(\hat f_h\)'s to act as ``reality checks'' for the \(\hat f_h\)
 of the \(h\) we are focusing on. Keeping the estimates on the same graph
 allows for effective comparisons between the \(\hat f_h\)'s.
 
+In addition to the \texttt{kde} function, a Shiny-based web application
+was developed and deployed to
+\url{https://bgstieber.shinyapps.io/kdeshinyapp/}. The application
+creates density plots for a variety of data choices, and allows the user
+to investigate different bandwidths for simulated and real-world data
+sets. Additionally, the app allows a user to upload a one column
+\texttt{.csv} file and investigate the kernel density estimate as well.
+
 \newpage
 
 \subsection{Example 1: 300 samples from $N(2, 2^2)$}
@@ -726,145 +734,13 @@ estimate a 95\% pointwise confidence interval. Create plots using
 \subsection{Bootstrap percentile
 interval}\label{bootstrap-percentile-interval}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{#function that computes the 95% pointwise percentile interval}
-\NormalTok{boot_dens <-}\StringTok{ }\NormalTok{function(x, from, to, B, bw)\{}
-    
-    
-    \NormalTok{orig_dens <-}\StringTok{ }\KeywordTok{density}\NormalTok{(x, }\DataTypeTok{from =} \NormalTok{from, }\DataTypeTok{to =} \NormalTok{to, }\DataTypeTok{bw =} \NormalTok{bw)}
-    
-    \NormalTok{boot_dens <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DataTypeTok{ncol =} \NormalTok{B, }\DataTypeTok{nrow =} \KeywordTok{length}\NormalTok{(orig_dens$x))}
-
-    \NormalTok{for(i in }\DecValTok{1}\NormalTok{:B)\{}
-        \NormalTok{boot.x <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(x, }\KeywordTok{length}\NormalTok{(x), }\DataTypeTok{replace =} \NormalTok{T)}
-        \NormalTok{boot.density <-}\StringTok{ }\KeywordTok{density}\NormalTok{(boot.x, }\DataTypeTok{from =} \NormalTok{from, }\DataTypeTok{to =} \NormalTok{to, }\DataTypeTok{bw =} \NormalTok{bw)}
-        \NormalTok{boot_dens[,i] <-}\StringTok{ }\NormalTok{boot.density$y}
-    \NormalTok{\}}
-    
-    \NormalTok{lower <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(boot_dens, }\DecValTok{1}\NormalTok{, function(mat) }\KeywordTok{quantile}\NormalTok{(mat, .}\DecValTok{025}\NormalTok{))}
-    \NormalTok{upper <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(boot_dens, }\DecValTok{1}\NormalTok{, function(mat) }\KeywordTok{quantile}\NormalTok{(mat, .}\DecValTok{975}\NormalTok{))}
-    
-    \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{grid =} \NormalTok{orig_dens$x,}
-               \DataTypeTok{yhat =} \NormalTok{orig_dens$y,}
-               \DataTypeTok{lower =} \NormalTok{lower,}
-               \DataTypeTok{upper =} \NormalTok{upper)}
-    
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{range_abv <-}\StringTok{ }\KeywordTok{range}\NormalTok{(abv.complete)}
-\NormalTok{range_abv <-}\StringTok{ }\NormalTok{range_abv +}\StringTok{ }\KeywordTok{c}\NormalTok{(-.}\DecValTok{5}\NormalTok{, .}\DecValTok{5}\NormalTok{) }\CommentTok{#wiggle room}
-    
-\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1984}\NormalTok{)}
-
-\NormalTok{boot.abv.SJ <-}\StringTok{ }\KeywordTok{boot_dens}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{from =} \NormalTok{range_abv[}\DecValTok{1}\NormalTok{],}
-                      \DataTypeTok{to =} \NormalTok{range_abv[}\DecValTok{2}\NormalTok{], }\DataTypeTok{B =} \DecValTok{1500}\NormalTok{, }\DataTypeTok{bw =} \StringTok{'SJ'}\NormalTok{)}
-
-\NormalTok{boot.abv.nrd0 <-}\StringTok{ }\KeywordTok{boot_dens}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{from =} \NormalTok{range_abv[}\DecValTok{1}\NormalTok{],}
-                      \DataTypeTok{to =} \NormalTok{range_abv[}\DecValTok{2}\NormalTok{], }\DataTypeTok{B =} \DecValTok{1500}\NormalTok{, }\DataTypeTok{bw =} \StringTok{'nrd0'}\NormalTok{)}
-
-\KeywordTok{ggplot}\NormalTok{(boot.abv.SJ, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{grid))+}
-\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{ymin =} \NormalTok{lower, }\DataTypeTok{ymax =} \NormalTok{upper),}
-                \DataTypeTok{alpha =} \NormalTok{.}\DecValTok{2}\NormalTok{)+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =} \NormalTok{yhat),}
-              \DataTypeTok{colour =} \StringTok{'#b70101'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{geom_rug}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{data.frame}\NormalTok{(abv.complete), }
-             \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{y =} \FloatTok{0.001}\NormalTok{),}
-             \DataTypeTok{inherit.aes =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{sides =} \StringTok{'b'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{'ABV'}\NormalTok{)+}\KeywordTok{ylab}\NormalTok{(}\StringTok{'Density'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'ABV Density and 95% Boostrapped Percentile Interval'}\NormalTok{,}
-            \DataTypeTok{subtitle =} \StringTok{'Sheather - Jones Bandwidth'}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \includegraphics{FinalReport_files/figure-latex/unnamed-chunk-13-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{(boot.abv.nrd0, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{grid))+}
-\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{ymin =} \NormalTok{lower, }\DataTypeTok{ymax =} \NormalTok{upper),}
-                \DataTypeTok{alpha =} \NormalTok{.}\DecValTok{2}\NormalTok{)+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =} \NormalTok{yhat),}
-              \DataTypeTok{colour =} \StringTok{'#b70101'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{geom_rug}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{data.frame}\NormalTok{(abv.complete), }
-             \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{y =} \FloatTok{0.001}\NormalTok{),}
-             \DataTypeTok{inherit.aes =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{sides =} \StringTok{'b'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{'ABV'}\NormalTok{)+}\KeywordTok{ylab}\NormalTok{(}\StringTok{'Density'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'ABV Density and 95% Boostrapped Percentile Interval'}\NormalTok{,}
-            \DataTypeTok{subtitle =} \StringTok{"Silverman's ROT Bandwidth"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \includegraphics{FinalReport_files/figure-latex/unnamed-chunk-13-2.pdf}
 
 \subsection{Approximate Confidence
 Interval}\label{approximate-confidence-interval}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{app_var <-}\StringTok{ }\NormalTok{function(x, bw)\{}
-    \NormalTok{R <-}\StringTok{ }\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(}\DecValTok{2} \NormalTok{*}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(pi)) }\CommentTok{# assume gaussian}
-    \NormalTok{h <-}\StringTok{ }\KeywordTok{ifelse}\NormalTok{(bw ==}\StringTok{ 'SJ'}\NormalTok{, }\KeywordTok{bw.SJ}\NormalTok{(x), }\KeywordTok{bw.nrd0}\NormalTok{(x))}
-    \NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(x)}
-    \NormalTok{range_x <-}\StringTok{ }\KeywordTok{range}\NormalTok{(x)}
-    \NormalTok{range_x <-}\StringTok{ }\NormalTok{range_x +}\StringTok{ }\KeywordTok{c}\NormalTok{(-.}\DecValTok{5}\NormalTok{, .}\DecValTok{5}\NormalTok{) }\CommentTok{#wiggle room}
-    \NormalTok{dens_x <-}\StringTok{ }\KeywordTok{density}\NormalTok{(x, }\DataTypeTok{from =} \NormalTok{range_x[}\DecValTok{1}\NormalTok{], }\DataTypeTok{to =} \NormalTok{range_x[}\DecValTok{2}\NormalTok{],}
-                      \DataTypeTok{kernel =} \StringTok{'gaussian'}\NormalTok{, }\DataTypeTok{bw =} \NormalTok{h)}
-    
-    \NormalTok{var.dens <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h)) *}\StringTok{ }\NormalTok{R *}\StringTok{ }\NormalTok{dens_x$y -}\StringTok{ }\NormalTok{((}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{n) *}\StringTok{ }\NormalTok{(dens_x$y) ^}\StringTok{ }\DecValTok{2}\NormalTok{)}
-    
-    \NormalTok{lower <-}\StringTok{ }\NormalTok{dens_x$y -}\StringTok{ }\NormalTok{(}\DecValTok{2} \NormalTok{*}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(var.dens))}
-    \NormalTok{upper <-}\StringTok{ }\NormalTok{dens_x$y +}\StringTok{ }\NormalTok{(}\DecValTok{2} \NormalTok{*}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(var.dens))}
-    
-    \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{grid =} \NormalTok{dens_x$x,}
-               \DataTypeTok{yhat =} \NormalTok{dens_x$y,}
-               \DataTypeTok{lower =} \NormalTok{lower,}
-               \DataTypeTok{upper =} \NormalTok{upper)}
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{app.abv.SJ <-}\StringTok{ }\KeywordTok{app_var}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{bw =} \StringTok{'SJ'}\NormalTok{)}
-\NormalTok{app.abv.nrd0 <-}\StringTok{ }\KeywordTok{app_var}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{bw =} \StringTok{'nrd0'}\NormalTok{)}
-
-\KeywordTok{ggplot}\NormalTok{(app.abv.SJ, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{grid))+}
-\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{ymin =} \NormalTok{lower, }\DataTypeTok{ymax =} \NormalTok{upper),}
-                \DataTypeTok{alpha =} \NormalTok{.}\DecValTok{2}\NormalTok{)+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =} \NormalTok{yhat), }\DataTypeTok{colour =} \StringTok{'#b70101'}\NormalTok{)+}
-\StringTok{        }\KeywordTok{geom_rug}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{data.frame}\NormalTok{(abv.complete), }
-             \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{y =} \FloatTok{0.001}\NormalTok{),}
-             \DataTypeTok{inherit.aes =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{sides =} \StringTok{'b'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{'ABV'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Density'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'ABV Density and 95% Pointwise CI'}\NormalTok{,}
-            \DataTypeTok{subtitle =} \StringTok{'Sheather - Jones Bandwidth'}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \includegraphics{FinalReport_files/figure-latex/unnamed-chunk-15-1.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{ggplot}\NormalTok{(app.abv.nrd0, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{grid))+}
-\StringTok{    }\KeywordTok{geom_ribbon}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{ymin =} \NormalTok{lower, }\DataTypeTok{ymax =} \NormalTok{upper),}
-                \DataTypeTok{alpha =} \NormalTok{.}\DecValTok{2}\NormalTok{)+}
-\StringTok{    }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =} \NormalTok{yhat), }\DataTypeTok{colour =} \StringTok{'#b70101'}\NormalTok{)+}
-\StringTok{        }\KeywordTok{geom_rug}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{data.frame}\NormalTok{(abv.complete), }
-             \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{abv.complete, }\DataTypeTok{y =} \FloatTok{0.001}\NormalTok{),}
-             \DataTypeTok{inherit.aes =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{sides =} \StringTok{'b'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{'ABV'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Density'}\NormalTok{)+}
-\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'ABV Density and 95% Pointwise CI'}\NormalTok{,}
-            \DataTypeTok{subtitle =} \StringTok{"Silverman's ROT Bandwidth"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
 \includegraphics{FinalReport_files/figure-latex/unnamed-chunk-15-2.pdf}
 
 \section{Appendix}\label{appendix}
@@ -881,7 +757,7 @@ Interval}\label{approximate-confidence-interval}
     \KeywordTok{require}\NormalTok{(ggplot2)}
     
     \NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(x)}
-    
+    \CommentTok{#calculate bandwidths and store in vector}
     \NormalTok{h.SROT =}\StringTok{ }\FloatTok{0.9} \NormalTok{*}\StringTok{ }\KeywordTok{min}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{IQR}\NormalTok{(x) /}\StringTok{ }\FloatTok{1.34}\NormalTok{, }\KeywordTok{sd}\NormalTok{(x))) *}\StringTok{ }\NormalTok{(n)^(-}\DecValTok{1}\NormalTok{/}\DecValTok{5}\NormalTok{)}
     \NormalTok{h.LSCV =}\StringTok{ }\KeywordTok{bw.ucv}\NormalTok{(x, }\DataTypeTok{lower =} \NormalTok{.}\DecValTok{05} \NormalTok{*}\StringTok{ }\NormalTok{h.SROT, }\DataTypeTok{upper =} \FloatTok{1.2} \NormalTok{*}\StringTok{ }\NormalTok{h.SROT)}
     \NormalTok{h.SJ =}\StringTok{ }\KeywordTok{bw.SJ}\NormalTok{(x)}
@@ -891,24 +767,19 @@ Interval}\label{approximate-confidence-interval}
     \NormalTok{max_h <-}\StringTok{ }\KeywordTok{max}\NormalTok{(h_vec)}
     \NormalTok{low_grid <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\KeywordTok{min}\NormalTok{(x) -}\StringTok{ }\NormalTok{max_h *}\StringTok{ }\DecValTok{3}\NormalTok{)}
     \NormalTok{high_grid <-}\StringTok{ }\KeywordTok{ceiling}\NormalTok{(}\KeywordTok{max}\NormalTok{(x) +}\StringTok{ }\NormalTok{max_h *}\StringTok{ }\DecValTok{3}\NormalTok{)}
-    
-    
-
+    \CommentTok{#print bandwidths to user}
     \KeywordTok{print}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{'LS CV'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.LSCV, }\DecValTok{3}\NormalTok{),}
             \StringTok{'T MS'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.MS, }\DecValTok{3}\NormalTok{),}
             \StringTok{'SJ BW'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.SJ, }\DecValTok{3}\NormalTok{),}
             \StringTok{"Silverman's ROT"} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.SROT, }\DecValTok{3}\NormalTok{)))}
-    
-    
+
     \NormalTok{if(n >}\StringTok{ }\DecValTok{1000}\NormalTok{)\{}
         \KeywordTok{message}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(}\StringTok{'Note: x too large (n = '}\NormalTok{, n, }
                        \StringTok{' > 1000). Using `density` instead'}\NormalTok{))}
-        
         \NormalTok{all_dens <-}\StringTok{ }\KeywordTok{do.call}\NormalTok{(}\StringTok{'cbind'}\NormalTok{, }
                             \KeywordTok{lapply}\NormalTok{(h_vec, function(bw)}
                                 \KeywordTok{density}\NormalTok{(}\DataTypeTok{x =} \NormalTok{x, }\DataTypeTok{from =} \NormalTok{low_grid, }\DataTypeTok{to =} \NormalTok{high_grid,}
                                         \DataTypeTok{bw=} \NormalTok{bw)$y))}
-        
         
         \NormalTok{dens_SNR <-}\StringTok{ }\KeywordTok{density}\NormalTok{(x, }\DataTypeTok{bw =} \NormalTok{h.SNR,}
                             \DataTypeTok{from =} \NormalTok{low_grid,}
@@ -925,12 +796,9 @@ Interval}\label{approximate-confidence-interval}
     \NormalTok{\}else\{}
         
         \NormalTok{grid_vals <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(low_grid, high_grid, }\DataTypeTok{length.out =} \NormalTok{grid)}
-        
         \NormalTok{grid_df <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{x =} \NormalTok{x, }\DataTypeTok{grid =} \NormalTok{grid_vals)}
         
-        
-        
-        \NormalTok{newx.hsrot <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.SROT}
+        \NormalTok{ewx.hsrot <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.SROT}
         \NormalTok{newx.hsj <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.SJ}
         \NormalTok{newx.hLSCV <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.LSCV}
         \NormalTok{newx.hMS <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.MS}
@@ -939,7 +807,6 @@ Interval}\label{approximate-confidence-interval}
         \NormalTok{grid_df[,}\DecValTok{4}\NormalTok{] <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h.SJ)) *}\StringTok{ }\KeywordTok{Knorm}\NormalTok{(newx.hsj)}
         \NormalTok{grid_df[,}\DecValTok{5}\NormalTok{] <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h.LSCV)) *}\StringTok{ }\KeywordTok{Knorm}\NormalTok{(newx.hLSCV)}
         \NormalTok{grid_df[,}\DecValTok{6}\NormalTok{] <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h.MS)) *}\StringTok{ }\KeywordTok{Knorm}\NormalTok{(newx.hMS)}
-        
         
         \KeywordTok{names}\NormalTok{(grid_df) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}
             \StringTok{"X_act"}\NormalTok{, }
@@ -950,7 +817,6 @@ Interval}\label{approximate-confidence-interval}
             \StringTok{'kde_hMS'}
         \NormalTok{)}
         
-        
         \NormalTok{sum_results <-}\StringTok{ }
 \StringTok{            }\NormalTok{grid_df %>%}
 \StringTok{            }\KeywordTok{group_by}\NormalTok{(X_grid) %>%}
@@ -959,7 +825,6 @@ Interval}\label{approximate-confidence-interval}
                       \DataTypeTok{kde_hLSCV =} \KeywordTok{sum}\NormalTok{(kde_hLSCV),}
                       \DataTypeTok{kde_hMS =} \KeywordTok{sum}\NormalTok{(kde_hMS))}
     \NormalTok{\}}
-    
     
     \NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{()+}
 \StringTok{        }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NULL}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{x, }\DataTypeTok{y =} \NormalTok{..density..),}
@@ -979,7 +844,6 @@ Interval}\label{approximate-confidence-interval}
 \StringTok{        }\KeywordTok{scale_colour_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{'Set1'}\NormalTok{,}
                             \DataTypeTok{name =} \StringTok{'Bandwidth'}\NormalTok{)}
     \KeywordTok{plot}\NormalTok{(p1)}
-    
     \NormalTok{if(give_dens)\{}
         \KeywordTok{return}\NormalTok{(sum_results)}
     \NormalTok{\}}

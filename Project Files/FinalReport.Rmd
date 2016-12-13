@@ -319,6 +319,7 @@ In terms of kernel density estimation; however, the maximal smoothing principle 
 
 # Examples Using the `kde` Function
 
+
 To examine the four different bandwidth selections we have investigated, we use four different data vectors to investigate the changes in density estimation as the data deviates from the normal distribution. Two vectors are simulated, and two vectors are from real data sets.^[The `R` code used to generate the data can be found on the author's Github: https://github.com/bgstieber/Project771/blob/master/Project%20Files/DataGeneration.R] Our main interest is on if the bandwidth options lead to undersmoothing or oversmoothing of the data. 
 
 We plot histograms and density estimates for each of the data vectors using the `kde` function (source code available in _Appendix_). The `kde` function takes in a data vector, and calculates $h_{SROT}$, $h_{SJ}$, $h_{LSCV}$, and $h_{MS}$. It then calculates $\widehat{f}_h(x)$. For small data vectors ($n \leq 1,000$), `kde` will calculate the densities "by hand", using a grid of size 512. For larger data vectors, the function will use the `density` function in base `R`. In addition to creating plots, the `kde` function will print the four bandwidths, and can also return $\widehat{f}_h(x)$ for an evenly spaced grid of length 512 for each $h$.
@@ -326,6 +327,8 @@ We plot histograms and density estimates for each of the data vectors using the 
 In each example, we choose a data vector and display the output from `kde`. We then attempt to interpret the results, taking special care to analyze the effect of each bandwidth choice on $\hat{f}_h$. Inspecting a kernel density estimate is not an objective task, one analyst will perceive different features than another. It is important to present multiple density estimates, and iterate through different bandwidths to arrive at a more common conclusion. 
 
 We include each $\hat f_h$ on the same graph rather than allowing each $\hat f_h$ to have its own panel. This strategy allows for the other three $\hat f_h$'s to act as "reality checks" for the $\hat f_h$ of the $h$ we are focusing on. Keeping the estimates on the same graph allows for effective comparisons between the $\hat f_h$'s.
+
+In addition to the `kde` function, a Shiny-based web application was developed and deployed to https://bgstieber.shinyapps.io/kdeshinyapp/. The application creates density plots for a variety of data choices, and allows the user to investigate different bandwidths for simulated and real-world data sets. Additionally, the app allows a user to upload a one column `.csv` file and investigate the kernel density estimate as well.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 library(rvest)
@@ -435,7 +438,7 @@ abv.complete <- beer_data[!is.na(beer_data$ABV), ]$ABV
 
 ##Bootstrap percentile interval
 
-```{r}
+```{r echo = FALSE}
 #function that computes the 95% pointwise percentile interval
 boot_dens <- function(x, from, to, B, bw){
     
@@ -467,7 +470,7 @@ b_theme <- theme_bw() + theme(panel.grid = element_blank())
 theme_set(b_theme)
 ```
 
-```{r message = FALSE, warning=FALSE}
+```{r message = FALSE, warning=FALSE, echo = FALSE}
 range_abv <- range(abv.complete)
 range_abv <- range_abv + c(-.5, .5) #wiggle room
     
@@ -507,7 +510,7 @@ ggplot(boot.abv.nrd0, aes(x = grid))+
 
 ## Approximate Confidence Interval
 
-```{r}
+```{r echo = FALSE}
 app_var <- function(x, bw){
     R <- 1 / (2 * sqrt(pi)) # assume gaussian
     h <- ifelse(bw == 'SJ', bw.SJ(x), bw.nrd0(x))
@@ -529,7 +532,7 @@ app_var <- function(x, bw){
 }
 ```
 
-```{r}
+```{r echo = FALSE}
 app.abv.SJ <- app_var(x = abv.complete, bw = 'SJ')
 app.abv.nrd0 <- app_var(x = abv.complete, bw = 'nrd0')
 
@@ -572,7 +575,7 @@ kde <- function (x, grid = 512, give_dens = FALSE)
     require(ggplot2)
     
     n <- length(x)
-    
+    #calculate bandwidths and store in vector
     h.SROT = 0.9 * min(c(IQR(x) / 1.34, sd(x))) * (n)^(-1/5)
     h.LSCV = bw.ucv(x, lower = .05 * h.SROT, upper = 1.2 * h.SROT)
     h.SJ = bw.SJ(x)
@@ -582,24 +585,19 @@ kde <- function (x, grid = 512, give_dens = FALSE)
     max_h <- max(h_vec)
     low_grid <- floor(min(x) - max_h * 3)
     high_grid <- ceiling(max(x) + max_h * 3)
-    
-    
-
+    #print bandwidths to user
     print(c('LS CV' = round(h.LSCV, 3),
             'T MS' = round(h.MS, 3),
             'SJ BW' = round(h.SJ, 3),
             "Silverman's ROT" = round(h.SROT, 3)))
-    
-    
+
     if(n > 1000){
         message(paste0('Note: x too large (n = ', n, 
                        ' > 1000). Using `density` instead'))
-        
         all_dens <- do.call('cbind', 
                             lapply(h_vec, function(bw)
                                 density(x = x, from = low_grid, to = high_grid,
                                         bw= bw)$y))
-        
         
         dens_SNR <- density(x, bw = h.SNR,
                             from = low_grid,
@@ -616,12 +614,9 @@ kde <- function (x, grid = 512, give_dens = FALSE)
     }else{
         
         grid_vals <- seq(low_grid, high_grid, length.out = grid)
-        
         grid_df <- expand.grid(x = x, grid = grid_vals)
         
-        
-        
-        newx.hsrot <- (grid_df[,2] - grid_df[,1]) / h.SROT
+        ewx.hsrot <- (grid_df[,2] - grid_df[,1]) / h.SROT
         newx.hsj <- (grid_df[,2] - grid_df[,1]) / h.SJ
         newx.hLSCV <- (grid_df[,2] - grid_df[,1]) / h.LSCV
         newx.hMS <- (grid_df[,2] - grid_df[,1]) / h.MS
@@ -630,7 +625,6 @@ kde <- function (x, grid = 512, give_dens = FALSE)
         grid_df[,4] <- (1 / (n * h.SJ)) * Knorm(newx.hsj)
         grid_df[,5] <- (1 / (n * h.LSCV)) * Knorm(newx.hLSCV)
         grid_df[,6] <- (1 / (n * h.MS)) * Knorm(newx.hMS)
-        
         
         names(grid_df) <- c(
             "X_act", 
@@ -641,7 +635,6 @@ kde <- function (x, grid = 512, give_dens = FALSE)
             'kde_hMS'
         )
         
-        
         sum_results <- 
             grid_df %>%
             group_by(X_grid) %>%
@@ -650,7 +643,6 @@ kde <- function (x, grid = 512, give_dens = FALSE)
                       kde_hLSCV = sum(kde_hLSCV),
                       kde_hMS = sum(kde_hMS))
     }
-    
     
     p1 <- ggplot()+
         geom_histogram(data = NULL, aes(x = x, y = ..density..),
@@ -670,7 +662,6 @@ kde <- function (x, grid = 512, give_dens = FALSE)
         scale_colour_brewer(palette = 'Set1',
                             name = 'Bandwidth')
     plot(p1)
-    
     if(give_dens){
         return(sum_results)
     }
