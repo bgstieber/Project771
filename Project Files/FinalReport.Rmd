@@ -6,7 +6,7 @@ output:
   pdf_document: 
     keep_tex: yes
 bibliography: library.bib
-abstract: "Univariate kernel density estimation allows an analyst to get a quick glimpse of some of the distributional properties for some data vector they have in hand. Of utmost importance in kernel density estimation is selecting the bandwidth, which controls the smoothness of the estimate. Insufficient smoothing leads to an estimate which may detect spurious modality, and over-smoothing may obscure important patterns within the data. In this report, we discuss various methods for selecting an optimal bandwidth for univariate kernel density estimation. We discuss Silverman's rule of thumb (1986), a cross-validation technique, Sheather and Jones' plug-in estimator (1991), and Terrell's maximal smoothing principle (1990). We visualize results from univariate density estimation using the different bandwidths for various data vectors, referencing a function written in the R computing environment. We also developed and deployed a Shiny-based web application which provides an interactive summary of some of the important aspects of this report."
+abstract: "Univariate kernel density estimation allows an analyst to get a quick glimpse of the distributional properties for some data vector they have in hand. Of utmost importance in kernel density estimation is selecting the bandwidth, which controls the smoothness of the estimate. Insufficient smoothing leads to an estimate which may detect spurious modality, and over-smoothing may obscure important patterns within the data. In this report, we discuss various methods for selecting an optimal bandwidth for univariate kernel density estimation. We discuss Silverman's rule of thumb (1986), a cross-validation technique, Sheather and Jones' plug-in estimator (1991), and Terrell's maximal smoothing principle (1990). We visualize results from univariate density estimation using the different bandwidths for various data vectors, referencing a function written in the R computing environment. We also developed and deployed a Shiny-based web application which provides an interactive summary of some of the important aspects of this report."
 ---
 
 ```{r echo =FALSE, warning=FALSE, message=FALSE}
@@ -17,14 +17,13 @@ source('kde.R')
 
 # Introduction
 
-Kernel density estimation allows a data analyst to get a view of an estimate of the density from which their data may have come. The univariate kernel density estimate can be used in a visualization setting or in a simulation setting. Furthermore, the KDE can present an analyst with a more refined view of the potential modality within their data than a histogram can.
+Kernel density estimation (KDE) allows a data analyst to estimate the probability density $f$ of some univariate data vector they have. An analyst may use KDE for a quick visualization, or even implement the results from their KDE into a simulation study. The results of a KDE are typically visualized as curves, which may provide a more refined view of the modality within a data vector than a histogram.^[The refinement of the display may come at the cost of overemphasizing the smoothness of the estimator. It is good practice to overlay a histogram plot with the KDE.]
 
-We can use a kernel density estimate for exploratory analysis, or for more thorough simulation studies. The focus of this report is on the bandwidth of a kernel density estimate. The bandwidth controls how smooth our estimate of the underlying density is. If we select a large bandwidth, we will smooth out some of the interesting features of the distribution of the data. If we select a small bandwidth, our density estimate may be too "wiggly", and over-exaggerate random perturbations in the data as multi-modality. While many methods exist for selecting a bandwidth, it should be noted that no universally best method has been found [@Givens2013, p. 332].
-
+A kernel density estimate requires the selection of a kernel ($K$), and a bandwidth ($h$). In this report, our focus is on selecting the bandwidth $h$. The bandwidth controls how smooth our estimate of the underlying density is. If we select a large bandwidth, we will smooth out some of the interesting features of the distribution of the data. If we select a small bandwidth, our density estimate may be too "wiggly", and over-exaggerate random perturbations in the data as multi-modality. While many methods exist for selecting a bandwidth, it should be noted that no universally best method has been found [@Givens2013, p. 332].
 
 Suppose we have a sample $x_1, x_2, \ldots, x_n$ which are i.i.d. observations from some density $f$. We wish to estimate $f$ using $\hat{f}$ for an analysis. We can use the kernel density estimator $\hat{f}$ to approximate the density.
 
-The kernel density estimate of $f$ is
+The kernel density estimate of $f$ at $x$ is:
 
 $$\widehat{f_h}(x) = \frac{1}{nh} \sum_{i = 1}^{n}K\left(\frac{x - x_i}{h}\right) $$
 
@@ -96,18 +95,18 @@ legend('topright', bty = 'n',
 
 ```
 
-We have provided three density estimates in Figure 2, each using a Gaussian kernel, but different bandwidths. The lighter solid line is too small of a bandwidth ($h$ = 0.2), it is too sensitive to local perturbations. The dashed line is too large of a bandwidth ($h$ = 2), so it over-smooths the interesting components of the distribution. The heavy line ($h$ = 0.6) seems to be a fairly respectable bandwidth, it does not over-smooth the data, and it also highlights some of the interesting features of the data. 
+We have provided three density estimates in Figure 2, each using a Gaussian kernel, but different bandwidths. The lighter solid line is too small of a bandwidth ($h$ = 0.2), it is too sensitive to local perturbations. The dashed line is too large of a bandwidth ($h$ = 2), so it over-smooths the interesting components of the distribution. The heavy line ($h$ = 0.6) seems to be a fairly respectable bandwidth; it does not over-smooth the data, and it also highlights some of the interesting features of the data. 
 
 \newpage
 
 # Methods for evaluating KDE
 
-To calculate $\widehat{f_h}(x)$, we need to compute an estimate for every observation $x_i$, based on the $n-1$ remaining observations in the data. This computation requires $n (n-1)$ computations to calculate the final estimate. To get around such a computationally intensive calculation, possible techniques such as linear binning and Fast Fourier Transforms are used (both are implemented in `R`'s `density` function).
+To calculate $\widehat{f_h}(x)$, we need to compute an estimate for every observation $x_i$, based on the $n-1$ remaining observations in the data. This computation requires $n (n-1)$ computations to calculate the final estimate. To get around such a computationally intensive calculation, techniques such as linear binning and Fast Fourier Transforms are used (both are implemented in `R`'s `density` function).
 
-Computing the kernel density estimator amounts to piling up mass around each $x$, then summing the mass up over $x_1, x_2, \ldots, x_n$. Figure 3 demonstrates this computation. We start with 10 i.i.d. observations from $N(0,1)$, which are the red triangles in the plot. Using a Gaussian kernel, we compute the densities (scaled by $1/nh$) for each $x$, which are the blue curves in the plot. We then sum across these pointwise densities and are left with our final KDE, which is the black curve. We have provided plots for a large bandwidth and a small bandwidth, demonstrating the micro and macro effects of bandwidth selection.
+Computing the kernel density estimator amounts to piling up mass around each $x$, then summing the mass up over $x_1, x_2, \ldots, x_n$. Figure 3 demonstrates this computation. We start with 10 i.i.d. observations from $N(0,1)$, which are the red triangles in the plot. Using a Gaussian kernel, we compute the densities (scaled by $1/nh$) for each $x$, which are the solid blue curves in the plot. We then sum across these pointwise densities and are left with our final KDE, which is the dashed black curve. We have provided plots for a large bandwidth and a small bandwidth, demonstrating the micro and macro effects of bandwidth selection.
 
 
-```{r echo = FALSE, fig.height = 3.5, fig.width = 7, fig.align = 'center', fig.cap = "Demonstration of KDE computation. Red triangles are 10 i.i.d. data points from N(0,1). Blue lines are scaled densities at each data point. Black line is final KDE. Left panel uses a large bandwidth (more smoothing), right panel uses a small bandwidth (less smoothing)."}
+```{r echo = FALSE, fig.height = 3.5, fig.width = 7, fig.align = 'center', fig.cap = "Demonstration of KDE computation. Red triangles are 10 i.i.d. data points from N(0,1). The solid blue lines are scaled densities at each data point. The dashed black line is the final KDE. Left panel uses a large bandwidth (more smoothing), right panel uses a small bandwidth (less smoothing)."}
 
 par(mar=rev(c(1, 1.5, 2, 1)), mfrow=c(1,2),
    oma = rev(c(.1, .1, 2, 1)))
@@ -120,7 +119,8 @@ h <- 1.1 * (n)^(-1/5)
 
 plot(0,0, pch = '', xlab = '', ylab = '',
      xlim = c(-3, 3), ylim = c(0, .56),
-     main = 'KDE with Large Bandwidth'
+     main = 'KDE with Large Bandwidth',
+     lty = 2
      )
 
 for(i in 1:n){
@@ -129,7 +129,7 @@ for(i in 1:n){
     fhat <- fhat + f
 }
 
-lines(x, fhat)
+lines(x, fhat, lty = 2, lwd = 2)
 points(kCenter, rep(-.0101, n), col = 'red', pch = 2)
 
 
@@ -151,12 +151,12 @@ for(i in 1:n){
     fhat <- fhat + f
 }
 
-lines(x, fhat)
+lines(x, fhat, lty = 2, lwd = 2)
 points(kCenter, rep(-.0101, n), col = 'red', pch = 2)
 ```
 
 
-\subsection{Evaluating the Fit of $\widehat{f}_h(x)$}
+\subsection{Evaluating $\widehat{f}_h(x)$ as an Estimator}
 
 Along with the computation of $\widehat{f_h}(x)$, it is also important to assess the quality of $\hat{f}$ as an estimator of $f$. One choice would the be the Integrated Squared Error (ISE):
 
@@ -199,7 +199,7 @@ MISE(h) &= \frac{R(K)}{nh} + o\left(\frac{1}{nh}\right) + \frac{1}{4}h^4 \sigma_
 $$
 where $AMISE$ is the Asymptotic Mean Integrated Squared Error. If $nh \rightarrow \infty$ and $h \rightarrow 0$ as $n \rightarrow \infty$, then $MISE(h) \rightarrow 0$. 
 
-Inspection of the $bias^2$ and $var$ components of $MISE(h)$ with respect to the bandwidth $h$ provides an example of the bias-variance tradeoff. Selecting a small value of $h$ increases variance by producing a wiggly estimate, but reduces bias. Selecting a large value of $h$ reduces the variance of the estimator, but increases the bias due to over-smoothing. To find an optimal value, we must balance the bias and variance components of $MISE$, a typical theme in statistical inference.
+Inspection of the $bias^2$ and $var$ components of $MISE(h)$ with respect to the bandwidth $h$ provides an example of the bias-variance tradeoff. Selecting a small value of $h$ increases variance by producing a wiggly estimate, but reduces bias. Selecting a large value of $h$ reduces the variance of the estimator, but increases the bias due to over-smoothing. To find an optimal value, we must balance the bias and variance components of $MISE$, a typical theme in statistics.
 
 Finding an optimal bandwidth $h_{AMISE}$, is straightforward:
 
@@ -213,7 +213,7 @@ h_{AMISE} &= \left(\frac{R(K)}{n\sigma_K^4R(f^{''})}\right)^{\frac{1}{5}}.
 \end{aligned}
 $$
 
-All of the components of $h_{AMISE}$ are known to us, except for $R(f^{''})$. $R(f^{''})$ posseses a key to determining an appropriate bandwidth, of $R(f^{''})$, @Sheather2004[p. 589] states:
+All of the components of $h_{AMISE}$ are known to us, except for $R(f^{''})$. $R(f^{''})$ posseses a key to determining an appropriate bandwidth. Of $R(f^{''})$, @Sheather2004[p. 589] states:
 
 > Thus, the functional $R(f^{''})$ is a measure of the underlying roughness or curvature. In particular, the larger the value of $R(f^{''})$ is, the larger is the value of AMISE (i.e., the more difficult it is to estimate $f$) and the smaller is the value of $h_{AMISE}$ (i.e., the smaller the bandwidth needed to capture the curvature in $f$). 
 
@@ -284,7 +284,7 @@ $$
 
 In our report, we replace 1.06 in the previous equation with 0.9, so that $h_{SROT} = \frac{0.9}{1.06} h_{SROT_1}$. This replacement dampens some of the over-smoothing that takes place when this method is used, and attempts to avoid missing bimodality in the distribution [@Silverman1986, page 48]. In `R`, a user can obtain $h_{SROT_1}$ for a data vector `x` by using `bw.nrd(x)`, and can obtain $h_{SROT}$ by using `bw.nrd0(x)`.
 
-The computation of $h_{SROT}$ is fairly simple, and requires no optimization or cross-validation scheme. The simplicity comes at a cost; however, since this bandwidth tends to oversmooth the estimate, even after the IQR correction is made. The over-smoothing gets worse as $f$ deviates from normality.
+The computation of $h_{SROT}$ is fairly simple, and requires no optimization or cross-validation scheme. The simplicity comes at a cost; however, as this bandwidth tends to oversmooth the estimate, even after the IQR correction is made. The over-smoothing typically gets worse as $f$ deviates from normality.
 
 ##Sheather-Jones Bandwidth
 
@@ -297,7 +297,7 @@ $$
 \end{aligned}
 $$
 
-Where $h_0$ is another bandwidth, different from $h_{opt}$ (and typically $h_0 > h_{opt}$ @Givens2013[p.336]), and $L$ is a kernel function.
+Where $h_0$ is another bandwidth, different from $h$ (and typically $h_0 > h$ @Givens2013[p.336]), and $L$ is a kernel function.
 
 To compute the optimal bandwidth $h_{SJ}$, Sheather and Jones use a two-step process. First, a simple rule of thumb is used to calculate $h_0$. Then $h_0$ is used to estimate $R(f^{''})$, which is the only unknown quantity in the expression for $h_{AMISE}$. After plugging in the estimator for $R(f^{''})$ in the expression for $h_{AMISE}$, we arrive at the Sheather-Jones bandwidth. An expression for the optimal bandwidth when $L = \phi$ is in the Appendix. This expression requires a root-finding scheme such as Newton's method.
 
@@ -306,7 +306,7 @@ In simulation studies (summarized in @Jones1996), it was seen that $h_{SJ}$ tend
 
 ##Terrell's Maximal Smoothing Principle
 
-@Terrell1990 opted for a different approach in determining an optimal bandwidth. Rather than focusing on finding a good estimator of $f''$ or $R(f'')$ in the expression for $h_{AMISE}$, Terrell chose to find some density function $g$ that would minimize $R(g'') = \int (g '' (x))^2 dx$ for a given variance $\sigma^2$. By minimizing $\int (g'')^2$, we could determine an upper bound for $h_{opt}$, by using $g$ in place of $f$. @Terrell1990[p. 472] justifies using the maximally smoothed bandwidth, because it avoids the tendency of the under-smoothed density estimate to "display features such as asymmetries and multiple modes that could have come about by chance".
+@Terrell1990 opted for a different approach in determining an optimal bandwidth. Rather than focusing on finding a good estimator of $f''$ or $R(f'')$ in the expression for $h_{AMISE}$, Terrell chose to find some density function $g$ that would minimize $R(g'') = \int (g '' (x))^2 dx$ for a given variance $\sigma^2$. By minimizing $\int (g'')^2$, we could determine an upper bound for $h_{AMISE}$, by using $g$ in place of $f$. @Terrell1990[p. 472] justifies using the maximally smoothed bandwidth, because it avoids the tendency of the under-smoothed density estimate to "display features such as asymmetries and multiple modes that could have come about by chance".
 
 Terrell's estimate is built on the result that the $beta(k + 2, k + 2)$ family minimizes $\int (f^{(k)})^2$ for a given standard deviation [@Terrell1990, p. 471]. For a kernel with variance 1 (e.g. the Gaussian kernel), the maximal smoothing bandwidth is:
 
@@ -320,13 +320,13 @@ In terms of kernel density estimation; however, the maximal smoothing principle 
 
 # Examples Using the `kde` Function
 
-To examine the four different bandwidth selections we have investigated, we use four different data vectors to investigate the changes in density estimation as the data deviates from the normal distribution. Two vectors are simulated, and two vectors are from real data sets.^[The `R` code used to generate the data can be found on the author's Github: https://github.com/bgstieber/Project771/blob/master/Project%20Files/DataGeneration.R] Our main interest is on if the bandwidth options lead to under-smoothing or over-smoothing of the data. 
+To examine the four bandwidth selection methods we have investigated, we use four different data vectors to investigate the changes in density estimation as the data deviates from the normal distribution. Two vectors are simulated, and two vectors are from real data sets.^[The `R` code used to generate the data can be found on the author's Github: https://github.com/bgstieber/Project771/blob/master/Project%20Files/DataGeneration.R] Our main interest is on if the bandwidth options lead to under-smoothing or over-smoothing of the data. 
 
 We plot histograms and density estimates for each of the data vectors using the `kde` function. The `kde` function takes in a data vector, and calculates $h_{SROT}$, $h_{SJ}$, $h_{LSCV}$, and $h_{MS}$. It then calculates $\widehat{f}_h(x)$. For small data vectors ($n \leq 1,000$), `kde` will calculate the densities "by hand", using a grid of size 512. For larger data vectors, the function will use the `density` function in base `R`. In addition to creating plots, the `kde` function will print the four bandwidths, and can also return $\widehat{f}_h(x)$ for an evenly spaced grid of length 512 for each $h$.
 
 In each example, we choose a data vector and display the output from `kde`. We then attempt to interpret the results, taking special care to analyze the effect of each bandwidth choice on $\hat{f}_h$. Inspecting a kernel density estimate is not an objective task, as one analyst may perceive different features than another. It is important to present multiple density estimates, and iterate through different bandwidths to arrive at a more common conclusion. 
 
-We include each $\hat f_h$ on the same graph rather than allowing each $\hat f_h$ to have its own panel. This strategy allows for the other three $\hat f_h$'s to act as "reality checks" for the $\hat f_h$ of the $h$ we are focusing on. Keeping the estimates on the same graph allows for effective comparisons between the $\hat f_h$'s.
+We include each $\hat f_h$ on the same graph rather than allowing each $\hat f_h$ to have its own panel. This strategy allows for the other three $\hat f_h$'s to act as "reality checks" for the $\hat f_h$ of the $h$ we are focusing on. Keeping the estimates on the same graph should allow for effective comparisons between the $\hat f_h$'s.
 
 \subsection{Shiny Web Application}
 
@@ -393,7 +393,7 @@ x <- c(rgamma(100, shape = 1, scale = 20),
 kde(x)
 ```
 
-Here we see the excessive variation caused by using $h_{LSCV}$. The density estimate provided by $h_{LSCV}$ is far too wiggly to be useful for a data analyst. We also see that $h_{MS}$ provides a much smoother estimate than the those proposed by Silverman and Sheather and Jones, it seems that it is too conservative. The best bandwidth would take a value somewhere in the range between $h_{SJ}$ and $h_{MS}$.
+Here we see the excessive variation caused by using $h_{LSCV}$. The density estimate provided by $h_{LSCV}$ is far too wiggly to be useful for a data analyst. We also see that $h_{MS}$ provides a much smoother estimate than the those proposed by Silverman and Sheather and Jones, it seems that it is too conservative. The best bandwidth would take a value somewhere in the neighbordhood of $h_{SJ}$ and $h_{SROT}$.
 
 \newpage
 \subsection{Example 4: Old Faithful Waiting Time}
@@ -414,11 +414,11 @@ In this report we have presented four options for selecting a bandwidth for univ
 
 A safe option for a novice data analyst is to use at least two bandwidths when analyzing the data. One bandwidth should have the tendency to under-smooth (e.g. $h_{SROT}$ or $h_{MS}$), and another bandwidth should produce estimates that are more wiggly (e.g. $h_{SJ}$, __but not $h_{LSCV}$__). If visualizing is the goal (rather than simulation), then including a histogram will provide even more clarity when making density plots (note that making a histogram also requires selecting a bandwidth, though).
 
-In our _Examples_ section, we saw the devastating effects of over-smoothing and under-smoothing. There is a large amount of literature on univariate bandwidth selection, but a universally optimal bandwidth has yet to be found. Selecting a bandwidth results presents a bias-variance tradeoff to the analyst, with a good bandwidth being dependent on the analytical task. @Sheather2004[p. 596] suggests to "produce a family of density estimates based on a number of values of the bandwidth". We agree with this suggestion, and believe it to be sage advice for exploratory analysis. 
+In our _Examples_ section, we saw the devastating effects of over-smoothing and under-smoothing. There is a large amount of literature on univariate bandwidth selection, but a universally optimal bandwidth has yet to be found. Selecting a bandwidth presents a bias-variance tradeoff to the analyst, with a good bandwidth being dependent on the analytical task. @Sheather2004[p. 596] suggests to "produce a family of density estimates based on a number of values of the bandwidth". We agree with this suggestion, and believe it to be sage advice for exploratory analysis. 
 
 # Question
 
-Using the `density` function and the beer data (`abv.complete`, which are the alcohol by volume measures for the top 250 beers as rated by BeerAdvocate.com) provided below, estimate a 95% pointwise bootstrapped percentile interval. Additionally, use the approximate variance function $\tilde{V}$ given by @Jann2007[p. 2] to estimate a 95% pointwise confidence interval. Create plots using `bw.SJ` and `bw.nrd0`. 
+Using the `density` function and the beer data (`abv.complete`, which are the alcohol by volume measures for the top 250 beers as rated by BeerAdvocate.com) provided below, compute and plot a 95% pointwise bootstrapped percentile interval. Additionally, use the approximate variance function $\tilde{V}$ given by @Jann2007[p. 2] to compute and plot a 95% pointwise confidence interval. Create two plots for each method using `bw.SJ` and `bw.nrd0`. 
 
 $$\tilde{V}\left(\widehat{f_K}(x;h)\right) = \frac{1}{nh}R(K) \widehat{f_K}(x;h) - \frac{1}{n} \widehat{f_K}(x;h)^2$$
 
@@ -564,10 +564,9 @@ ggplot(app.abv.nrd0, aes(x = grid))+
 
 
 # Appendix
-<!--
-## `kde` function in `R`
 
-```{r eval = FALSE}
+
+```{r eval = FALSE, echo = FALSE}
 Knorm <- function(u) dnorm(u)
 kde <- function (x, grid = 512, give_dens = FALSE) 
 {
@@ -667,10 +666,10 @@ kde <- function (x, grid = 512, give_dens = FALSE)
     }
 }
 ```
--->
+
 ## Expression for Sheather-Jones Bandwidth
 
-As found in @Givens2013[p.337], Sheather-Jones bandwidth can be found by solving the equation (using $L = \phi$):
+As found in @Givens2013[p.337], the Sheather-Jones bandwidth can be found by solving the equation (using $L = \phi$):
 
 $$
 \left( \frac{R(K)}{n\sigma^4_K\hat{R}_{\hat{\alpha}(h)}(f'')} \right)^{1/5} - h = 0,
