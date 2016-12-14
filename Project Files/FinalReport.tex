@@ -129,19 +129,19 @@ Kernel Density Estimation}
 \begin{abstract}
 Univariate kernel density estimation allows an analyst to get a quick
 glimpse of some of the distributional properties for some data vector
-they have in hand. Kernel density estimation can also allow a
-statistician to generate simulations using the estimated density. Of
-utmost importance in kernel density estimation is selecting the
-bandwidth, which controls the smoothness of the estimate. Insufficient
-smoothing leads to an estimate which may detect spurious modality, and
-over-smoothing may obscure important patterns within the data. In this
-report, we discuss various methods for selecting an optimal bandwidth
-for univariate kernel density estimation. We discuss Silverman's rule of
-thumb (1986), a cross-validation technique, Sheather and Jones' plug-in
-estimator (1991), and Terrell's maximal smoothing principle (1990). We
-also visualize results from univariate density estimation using the
-different bandwidths for various data vectors, referencing a function
-written in the R computing environment.
+they have in hand. Of utmost importance in kernel density estimation is
+selecting the bandwidth, which controls the smoothness of the estimate.
+Insufficient smoothing leads to an estimate which may detect spurious
+modality, and over-smoothing may obscure important patterns within the
+data. In this report, we discuss various methods for selecting an
+optimal bandwidth for univariate kernel density estimation. We discuss
+Silverman's rule of thumb (1986), a cross-validation technique, Sheather
+and Jones' plug-in estimator (1991), and Terrell's maximal smoothing
+principle (1990). We visualize results from univariate density
+estimation using the different bandwidths for various data vectors,
+referencing a function written in the R computing environment. We also
+developed and deployed a Shiny-based web application which provides an
+interactive summary of some of the important aspects of this report.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
@@ -159,7 +159,7 @@ bandwidth of a kernel density estimate. The bandwidth controls how
 smooth our estimate of the underlying density is. If we select a large
 bandwidth, we will smooth out some of the interesting features of the
 distribution of the data. If we select a small bandwidth, our density
-estimate may be too ``wiggly'', and over exaggerate random perturbations
+estimate may be too ``wiggly'', and over-exaggerate random perturbations
 in the data as multi-modality. While many methods exist for selecting a
 bandwidth, it should be noted that no universally best method has been
 found (Givens and Hoeting 2013, 332).
@@ -182,10 +182,10 @@ is a kernel function which satisfies \(\int{K(x)dx} = 1\). In general,
 The kernel function is generally chosen to be a unimodal probability
 density function that is symmetric around zero. Popular choices include
 the Gaussian kernel (\(K(x) = \phi(x)\)), the Epanechnikov kernel
-(\(K(x) = \frac{3}{4}(1-x^2)*1(|x| <1)\)), and the triangular kernel
-(\(K(x) = (1 - |x|)*1(|x| < 1)\)). Provided that the kernel function
-\(K(x)\) satisfies the aforementioned conditions, the choice of kernel
-is not as important as selecting the bandwidth.
+(\(K(x) = \frac{3}{4}(1-x^2)*\mathbb{I}(|x| <1)\)), and the triangular
+kernel (\(K(x) = (1 - |x|)*\mathbb{I}(|x| < 1)\)). Provided the kernel
+function \(K(x)\) satisfies the aforementioned conditions, the choice of
+kernel will not be as important the selection of a bandwidth.
 
 \begin{figure}[htbp]
 \centering
@@ -195,15 +195,14 @@ Epanechnikov kernel, the dashed line is the standard Gaussian kernel,
 and the dotted line is the Triangular kernel}
 \end{figure}
 
-The selection of the bandwidth is more important than the selection of a
-kernel function. We use the bandwidth to control how much weight we
-apply to observations around the \(x\) for which we are evaluating
-\(\widehat{f_h}(x)\). If \(h\) is too small, we assign density too
-locally, resulting in wiggly estimates; however, if we select \(h\) to
-be too large, we spread density too diffusely, smoothing out interesting
-features of the data (Givens and Hoeting 2013). We have illustrated the
-effect of bandwidth in Figure 2, where we have evaluated
-\(\widehat{f_h}(x)\) for 200 points from the \(N(2, 3)\) density.
+We use the bandwidth to control how much weight we apply to observations
+around the \(x\) for which we are evaluating \(\widehat{f_h}(x)\). If
+\(h\) is too small, we assign density too locally, resulting in wiggly
+estimates; however, if we select \(h\) to be too large, we spread
+density too diffusely, smoothing out interesting features of the data
+(Givens and Hoeting 2013). We have illustrated the effect of bandwidth
+in Figure 2, where we have evaluated \(\widehat{f_h}(x)\) for 200 points
+from the \(N(2, 3)\) density.
 
 \begin{figure}[htbp]
 \centering
@@ -218,7 +217,7 @@ small of a bandwidth (\(h\) = 0.2), it is too sensitive to local
 perturbations. The dashed line is too large of a bandwidth (\(h\) = 2),
 so it over-smooths the interesting components of the distribution. The
 heavy line (\(h\) = 0.6) seems to be a fairly respectable bandwidth, it
-does not over-smooth the data, but it also highlights some of the
+does not over-smooth the data, and it also highlights some of the
 interesting features of the data.
 
 \newpage
@@ -227,7 +226,7 @@ interesting features of the data.
 
 To calculate \(\widehat{f_h}(x)\), we need to compute an estimate for
 every observation \(x_i\), based on the \(n-1\) remaining observations
-in the data. This computation requires \(n * (n-1)\) computations to
+in the data. This computation requires \(n (n-1)\) computations to
 calculate the final estimate. To get around such a computationally
 intensive calculation, possible techniques such as linear binning and
 Fast Fourier Transforms are used (both are implemented in \texttt{R}'s
@@ -239,9 +238,9 @@ Figure 3 demonstrates this computation. We start with 10 i.i.d.
 observations from \(N(0,1)\), which are the red triangles in the plot.
 Using a Gaussian kernel, we compute the densities (scaled by \(1/nh\))
 for each \(x\), which are the blue curves in the plot. We then sum
-across these computations and are left with our final KDE, which is the
-black curve. We have provided plots for a large bandwidth and a small
-bandwidth, demonstrating the micro and macro effects of bandwidth
+across these pointwise densities and are left with our final KDE, which
+is the black curve. We have provided plots for a large bandwidth and a
+small bandwidth, demonstrating the micro and macro effects of bandwidth
 selection.
 
 \begin{figure}
@@ -305,7 +304,7 @@ It can also be shown that
 \(var\left(\hat{f}(x)\right) = \frac{1}{nh}f(x)R(K) + o(\frac{1}{nh})\),
 and integrating \(var\) results in:
 
-\[\int var\left(\hat{f}(x)\right)dx = \frac{R(K)}{nh} + o(\frac{1}{nh}).\]
+\[\int var\left(\hat{f}(x)\right)dx = \frac{R(K)}{nh} + o\left(\frac{1}{nh}\right).\]
 
 Adding \(bias^2\) and \(var\) together results in:
 
@@ -321,14 +320,13 @@ MISE(h) &= \frac{R(K)}{nh} + o\left(\frac{1}{nh}\right) + \frac{1}{4}h^4 \sigma_
 Inspection of the \(bias^2\) and \(var\) components of \(MISE(h)\) with
 respect to the bandwidth \(h\) provides an example of the bias-variance
 tradeoff. Selecting a small value of \(h\) increases variance by
-producing a wiggly estimate, but reduces bias, while selecting a large
-value of \(h\) reduces the variance of the estimator, but increases the
-bias due to over-smoothing. To find an optimal value, we must balance
-the bias and variance components of \(MISE\), a typical theme in
-statistical inference.
+producing a wiggly estimate, but reduces bias. Selecting a large value
+of \(h\) reduces the variance of the estimator, but increases the bias
+due to over-smoothing. To find an optimal value, we must balance the
+bias and variance components of \(MISE\), a typical theme in statistical
+inference.
 
-Finding an optimal bandwidth \(h_{AMISE}\), is straightforward using
-calculus (ignoring \(o\left(\frac{1}{nh} + h^4\right)\)):
+Finding an optimal bandwidth \(h_{AMISE}\), is straightforward:
 
 \[
 \begin{aligned}
@@ -341,7 +339,8 @@ h_{AMISE} &= \left(\frac{R(K)}{n\sigma_K^4R(f^{''})}\right)^{\frac{1}{5}}.
 \]
 
 All of the components of \(h_{AMISE}\) are known to us, except for
-\(R(f^{''})\). Of \(R(f^{''})\), Sheather (2004, 589) states:
+\(R(f^{''})\). \(R(f^{''})\) posseses a key to determining an
+appropriate bandwidth, of \(R(f^{''})\), Sheather (2004, 589) states:
 
 \begin{quote}
 Thus, the functional \(R(f^{''})\) is a measure of the underlying
@@ -362,8 +361,8 @@ strategies which employ different methods to circumvent not knowing
 \begin{itemize}
 \item
   Cross validation: choose a different objective function based on
-  \(ISE\), and use a LOO cross validation estimator to find
-  \(\int \hat{f}_h f\)
+  \(ISE\), and use a leave one out (LOO) cross validation estimator to
+  find \(\int \hat{f}_h f\)
 \item
   Silverman's ROT: replace \(f\) with the \(N(0, \sigma^2)\) density
 \item
@@ -391,13 +390,13 @@ term is entirely known. We can estimate the second term
 \hat{f}_{-i}(x_i) = \frac{1}{h(n-1)}\sum_{j \neq i} K\left(\frac{x_i - x_j}{h}\right)
 \]
 
-is the leave-one-out kernel density estimator using all of the data
-except \(x_i\).
+is the leave-one-out kernel density estimator at \(x_i\) using all of
+the data except \(x_i\).
 
 We then attempt to minimize
 
 \[
-UCV(h) = R(\hat{f}) - \frac{2}{n} \sum_{i = 1}^{n} \hat{f}_{-i}(x_i),
+UCV(h) = R(\hat{f}) - \frac{2}{n} \sum_{i = 1}^{n} \hat{f}_{-i}(x_i
 \] with respect to \(h\).
 
 \(UCV(h)\) is called the ``unbiased cross-validation'' criterion because
@@ -433,8 +432,8 @@ h_{AMISE} = \left(\frac{R(K)}{n\sigma_K^4R(f^{''})}\right)^{\frac{1}{5}}.
 \]
 
 If we choose \(f\) to be the normal density with mean 0 and variance
-\(\sigma^2\), and use set \(K\) to be the Gaussian kernel, we can
-express \(h_{AMISE}\) as:
+\(\sigma^2\), and use the Gaussian kernel for \(K\), we can express
+\(h_{AMISE}\) as:
 
 \[
 \begin{aligned}
@@ -446,7 +445,7 @@ h_{AMISE} &= \left(\frac{(2\sqrt{\pi})^{-1}}{\frac{3}{8}\pi^{-\frac{1}{2}}\sigma
 A natural estimate of \(\sigma\) is \(\hat{\sigma}\), the sample
 standard deviation. If the true \(f\) deviates from the features of a
 normal distribution (for instance, it is multimodal), this approximation
-may do a poor job (i.e.~it will oversmooth). A possiblity is to use the
+may do a poor job (i.e.~it will oversmooth). A possibility is to use the
 interquartile range, which is a more robust measure of spread. We then
 replace \(\hat{\sigma}\) with
 \(\tilde{\sigma} = min\left[\hat{\sigma}, \frac{IQR(x)}{1.34}\right]\).
@@ -458,16 +457,17 @@ h_{SROT_1} = 1.06 \tilde{\sigma} n ^ {-\frac{1}{5}}.
 
 In our report, we replace 1.06 in the previous equation with 0.9, so
 that \(h_{SROT} = \frac{0.9}{1.06} h_{SROT_1}\). This replacement
-dampens some of the oversmoothing that takes place when this method is
+dampens some of the over-smoothing that takes place when this method is
 used, and attempts to avoid missing bimodality in the distribution
 (Silverman 1986, 48). In \texttt{R}, a user can obtain \(h_{SROT_1}\)
 for a data vector \texttt{x} by using \texttt{bw.nrd(x)}, and can obtain
 \(h_{SROT}\) by using \texttt{bw.nrd0(x)}.
 
 The computation of \(h_{SROT}\) is fairly simple, and requires no
-optimzation or cross-validation scheme. The simplicity comes at a cost;
+optimization or cross-validation scheme. The simplicity comes at a cost;
 however, since this bandwidth tends to oversmooth the estimate, even
-after the IQR correction is made.
+after the IQR correction is made. The over-smoothing gets worse as \(f\)
+deviates from normality.
 
 \subsection{Sheather-Jones Bandwidth}\label{sheather-jones-bandwidth}
 
@@ -494,7 +494,7 @@ only unknown quantity in the expression for \(h_{AMISE}\). After
 plugging in the estimator for \(R(f^{''})\) in the expression for
 \(h_{AMISE}\), we arrive at the Sheather-Jones bandwidth. An expression
 for the optimal bandwidth when \(L = \phi\) is in the Appendix. This
-expression requires an root-finding scheme such as Newton's method.
+expression requires a root-finding scheme such as Newton's method.
 
 In simulation studies (summarized in Jones, Marron, and Sheather
 (1996)), it was seen that \(h_{SJ}\) tended to be superior to both
@@ -515,9 +515,9 @@ or \(R(f'')\) in the expression for \(h_{AMISE}\), Terrell chose to find
 some density function \(g\) that would minimize
 \(R(g'') = \int (g '' (x))^2 dx\) for a given variance \(\sigma^2\). By
 minimizing \(\int (g'')^2\), we could determine an upper bound for
-\(h_{opt}\), by using \(g\) as our estimate for \(f\). Terrell (1990,
-472) justifies using the maximally smoothed bandwidth, because it avoids
-the tendency of the undersmoothed density estimate to ``display features
+\(h_{opt}\), by using \(g\) in place of \(f\). Terrell (1990, 472)
+justifies using the maximally smoothed bandwidth, because it avoids the
+tendency of the under-smoothed density estimate to ``display features
 such as asymmetries and multiple modes that could have come about by
 chance''.
 
@@ -540,8 +540,8 @@ to the display of kernel density estimates.
 In terms of kernel density estimation; however, the maximal smoothing
 principle provides only an upper bound on the optimal bandwidth.
 Silverman's rule of thumb is an over-smoother, and Terrell's maximal
-smoothing bandwidth smooths out even more features of the data (Jones,
-Marron, and Sheather 1992, 9) than \(h_{SROT}\) does.
+smoothing bandwidth smooths out even more features of the data than
+\(h_{SROT}\) does (Jones, Marron, and Sheather 1992, 9).
 
 \section{\texorpdfstring{Examples Using the \texttt{kde}
 Function}{Examples Using the kde Function}}\label{examples-using-the-kde-function}
@@ -553,27 +553,26 @@ vectors are simulated, and two vectors are from real data
 sets.\footnote{The \texttt{R} code used to generate the data can be
   found on the author's Github:
   \url{https://github.com/bgstieber/Project771/blob/master/Project\%20Files/DataGeneration.R}}
-Our main interest is on if the bandwidth options lead to undersmoothing
-or oversmoothing of the data.
+Our main interest is on if the bandwidth options lead to under-smoothing
+or over-smoothing of the data.
 
 We plot histograms and density estimates for each of the data vectors
-using the \texttt{kde} function (source code available in
-\emph{Appendix}). The \texttt{kde} function takes in a data vector, and
-calculates \(h_{SROT}\), \(h_{SJ}\), \(h_{LSCV}\), and \(h_{MS}\). It
-then calculates \(\widehat{f}_h(x)\). For small data vectors
-(\(n \leq 1,000\)), \texttt{kde} will calculate the densities ``by
-hand'', using a grid of size 512. For larger data vectors, the function
-will use the \texttt{density} function in base \texttt{R}. In addition
-to creating plots, the \texttt{kde} function will print the four
-bandwidths, and can also return \(\widehat{f}_h(x)\) for an evenly
+using the \texttt{kde} function. The \texttt{kde} function takes in a
+data vector, and calculates \(h_{SROT}\), \(h_{SJ}\), \(h_{LSCV}\), and
+\(h_{MS}\). It then calculates \(\widehat{f}_h(x)\). For small data
+vectors (\(n \leq 1,000\)), \texttt{kde} will calculate the densities
+``by hand'', using a grid of size 512. For larger data vectors, the
+function will use the \texttt{density} function in base \texttt{R}. In
+addition to creating plots, the \texttt{kde} function will print the
+four bandwidths, and can also return \(\widehat{f}_h(x)\) for an evenly
 spaced grid of length 512 for each \(h\).
 
 In each example, we choose a data vector and display the output from
 \texttt{kde}. We then attempt to interpret the results, taking special
 care to analyze the effect of each bandwidth choice on \(\hat{f}_h\).
-Inspecting a kernel density estimate is not an objective task, one
-analyst will perceive different features than another. It is important
-to present multiple density estimates, and iterate through different
+Inspecting a kernel density estimate is not an objective task, as one
+analyst may perceive different features than another. It is important to
+present multiple density estimates, and iterate through different
 bandwidths to arrive at a more common conclusion.
 
 We include each \(\hat f_h\) on the same graph rather than allowing each
@@ -582,15 +581,19 @@ three \(\hat f_h\)'s to act as ``reality checks'' for the \(\hat f_h\)
 of the \(h\) we are focusing on. Keeping the estimates on the same graph
 allows for effective comparisons between the \(\hat f_h\)'s.
 
+\subsection{Shiny Web Application}
+
 In addition to the \texttt{kde} function, a Shiny-based web application
 was developed and deployed to
 \url{https://bgstieber.shinyapps.io/kdeshinyapp/}. The application
 creates density plots for a variety of data choices, and allows the user
 to investigate different bandwidths for simulated and real-world data
-sets. Additionally, the app allows a user to upload a one column
-\texttt{.csv} file and investigate the kernel density estimate as well.
-
-\newpage
+sets. The application also allows a user to visualize pointwise
+confidence intervals for kernel density estimates using the approximate
+variance (Jann (2007)), and a nonparametric bootstrap percentile method.
+Additionally, the app allows a user to upload a one column \texttt{.csv}
+file and investigate the kernel density estimate as well. Screenshots of
+the application are in the \emph{Appendix}.
 
 \subsection{Example 1: 300 samples from $N(2, 2^2)$}
 
@@ -624,7 +627,7 @@ Moving on to a somewhat harder density to estimate, we simulate a 50/50
 distribution coming from \(N(0,1)\) and \(N(2, 2^2)\). \(h_{SJ}\) and
 \(h_{LSCV}\) both seem to capture the bimodality of the distribution
 quite well. \(h_{SROT}\) smooths out some of the interesting features,
-but the bimodality is still somewhat detectable. \(h_{MS}\) oversmooths
+but the bimodality is still somewhat detectable. \(h_{MS}\) over-smooths
 disastrously - without knowing the underlying structure of the data, it
 would not be obvious that the data came from a bimodal distribution.
 
@@ -680,26 +683,26 @@ bandwidth, which is \(h_{SROT}\).
 
 In this report we have presented four options for selecting a bandwidth
 for univariate kernel density estimation. We have discussed bandwidths
-that oversmooth (\(h_{MS}\)), and bandwidths that undersmooth
+that oversmooth (\(h_{MS}\)), and bandwidths that under-smooth
 (\(h_{LSCV}\)). No universally optimal bandwidth selection has been
 found, which makes selecting a bandwidth an iterative and subjective
 process.
 
 A safe option for a novice data analyst is to use at least two
 bandwidths when analyzing the data. One bandwidth should have the
-tendency to undersmooth (e.g. \(h_{SROT}\) or \(h_{MS}\)), and another
-bandwidth should produce estiamtes that are more wiggly (e.g.
-\(h_{SJ}\), \textbf{but not \(h_{LSCV}\)}). If vizualizing is the goal
+tendency to under-smooth (e.g. \(h_{SROT}\) or \(h_{MS}\)), and another
+bandwidth should produce estimates that are more wiggly (e.g.
+\(h_{SJ}\), \textbf{but not \(h_{LSCV}\)}). If visualizing is the goal
 (rather than simulation), then including a histogram will provide even
 more clarity when making density plots (note that making a histogram
 also requires selecting a bandwidth, though).
 
 In our \emph{Examples} section, we saw the devastating effects of
-oversmoothing and undersmoothing. There is a large amount of literature
-on univariate bandwidth selection, but a universally optimal bandwidth
-has yet to be found. Selecting a bandwidth results presents a
+over-smoothing and under-smoothing. There is a large amount of
+literature on univariate bandwidth selection, but a universally optimal
+bandwidth has yet to be found. Selecting a bandwidth results presents a
 bias-variance tradeoff to the analyst, with a good bandwidth being
-depedent on the analytical task. Sheather (2004, 596) suggests to
+dependent on the analytical task. Sheather (2004, 596) suggests to
 ``produce a family of density estimates based on a number of values of
 the bandwidth''. We agree with this suggestion, and believe it to be
 sage advice for exploratory analysis.
@@ -744,112 +747,6 @@ Interval}\label{approximate-confidence-interval}
 \includegraphics{FinalReport_files/figure-latex/unnamed-chunk-15-2.pdf}
 
 \section{Appendix}\label{appendix}
-
-\subsection{\texorpdfstring{\texttt{kde} function in
-\texttt{R}}{kde function in R}}\label{kde-function-in-r}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{Knorm <-}\StringTok{ }\NormalTok{function(u) }\KeywordTok{dnorm}\NormalTok{(u)}
-\NormalTok{kde <-}\StringTok{ }\NormalTok{function (x, }\DataTypeTok{grid =} \DecValTok{512}\NormalTok{, }\DataTypeTok{give_dens =} \OtherTok{FALSE}\NormalTok{) }
-\NormalTok{\{}
-    \KeywordTok{require}\NormalTok{(dplyr)}
-    \KeywordTok{require}\NormalTok{(ggplot2)}
-    
-    \NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(x)}
-    \CommentTok{#calculate bandwidths and store in vector}
-    \NormalTok{h.SROT =}\StringTok{ }\FloatTok{0.9} \NormalTok{*}\StringTok{ }\KeywordTok{min}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{IQR}\NormalTok{(x) /}\StringTok{ }\FloatTok{1.34}\NormalTok{, }\KeywordTok{sd}\NormalTok{(x))) *}\StringTok{ }\NormalTok{(n)^(-}\DecValTok{1}\NormalTok{/}\DecValTok{5}\NormalTok{)}
-    \NormalTok{h.LSCV =}\StringTok{ }\KeywordTok{bw.ucv}\NormalTok{(x, }\DataTypeTok{lower =} \NormalTok{.}\DecValTok{05} \NormalTok{*}\StringTok{ }\NormalTok{h.SROT, }\DataTypeTok{upper =} \FloatTok{1.2} \NormalTok{*}\StringTok{ }\NormalTok{h.SROT)}
-    \NormalTok{h.SJ =}\StringTok{ }\KeywordTok{bw.SJ}\NormalTok{(x)}
-    \NormalTok{h.MS =}\StringTok{ }\DecValTok{3} \NormalTok{*}\StringTok{ }\NormalTok{((}\DecValTok{2} \NormalTok{*}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(pi))^(-}\DecValTok{1}\NormalTok{) /}\StringTok{ }\NormalTok{(}\DecValTok{35} \NormalTok{*}\StringTok{ }\NormalTok{n))^(}\DecValTok{1}\NormalTok{/}\DecValTok{5}\NormalTok{) *}\StringTok{ }\KeywordTok{sd}\NormalTok{(x)}
-    \NormalTok{h_vec <-}\StringTok{ }\KeywordTok{c}\NormalTok{(h.SROT, h.LSCV, h.SJ, h.MS)}
-    
-    \NormalTok{max_h <-}\StringTok{ }\KeywordTok{max}\NormalTok{(h_vec)}
-    \NormalTok{low_grid <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\KeywordTok{min}\NormalTok{(x) -}\StringTok{ }\NormalTok{max_h *}\StringTok{ }\DecValTok{3}\NormalTok{)}
-    \NormalTok{high_grid <-}\StringTok{ }\KeywordTok{ceiling}\NormalTok{(}\KeywordTok{max}\NormalTok{(x) +}\StringTok{ }\NormalTok{max_h *}\StringTok{ }\DecValTok{3}\NormalTok{)}
-    \CommentTok{#print bandwidths to user}
-    \KeywordTok{print}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{'LS CV'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.LSCV, }\DecValTok{3}\NormalTok{),}
-            \StringTok{'T MS'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.MS, }\DecValTok{3}\NormalTok{),}
-            \StringTok{'SJ BW'} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.SJ, }\DecValTok{3}\NormalTok{),}
-            \StringTok{"Silverman's ROT"} \NormalTok{=}\StringTok{ }\KeywordTok{round}\NormalTok{(h.SROT, }\DecValTok{3}\NormalTok{)))}
-
-    \NormalTok{if(n >}\StringTok{ }\DecValTok{1000}\NormalTok{)\{}
-        \KeywordTok{message}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(}\StringTok{'Note: x too large (n = '}\NormalTok{, n, }
-                       \StringTok{' > 1000). Using `density` instead'}\NormalTok{))}
-        \NormalTok{all_dens <-}\StringTok{ }\KeywordTok{do.call}\NormalTok{(}\StringTok{'cbind'}\NormalTok{, }
-                            \KeywordTok{lapply}\NormalTok{(h_vec, function(bw)}
-                                \KeywordTok{density}\NormalTok{(}\DataTypeTok{x =} \NormalTok{x, }\DataTypeTok{from =} \NormalTok{low_grid, }\DataTypeTok{to =} \NormalTok{high_grid,}
-                                        \DataTypeTok{bw=} \NormalTok{bw)$y))}
-        
-        \NormalTok{dens_SNR <-}\StringTok{ }\KeywordTok{density}\NormalTok{(x, }\DataTypeTok{bw =} \NormalTok{h.SNR,}
-                            \DataTypeTok{from =} \NormalTok{low_grid,}
-                            \DataTypeTok{to =} \NormalTok{high_grid)}
-        
-        \NormalTok{sum_results <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}
-            \DataTypeTok{X_grid =} \NormalTok{dens_SNR$x,}
-            \DataTypeTok{kde_hSROT =} \NormalTok{all_dens[,}\DecValTok{1}\NormalTok{],}
-            \DataTypeTok{kde_hSJ =} \NormalTok{all_dens[,}\DecValTok{3}\NormalTok{],}
-            \DataTypeTok{kde_hLSCV =} \NormalTok{all_dens[,}\DecValTok{2}\NormalTok{],}
-            \DataTypeTok{kde_hMS =} \NormalTok{all_dens[,}\DecValTok{4}\NormalTok{]}
-        \NormalTok{)}
-        
-    \NormalTok{\}else\{}
-        
-        \NormalTok{grid_vals <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(low_grid, high_grid, }\DataTypeTok{length.out =} \NormalTok{grid)}
-        \NormalTok{grid_df <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{x =} \NormalTok{x, }\DataTypeTok{grid =} \NormalTok{grid_vals)}
-        
-        \NormalTok{ewx.hsrot <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.SROT}
-        \NormalTok{newx.hsj <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.SJ}
-        \NormalTok{newx.hLSCV <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.LSCV}
-        \NormalTok{newx.hMS <-}\StringTok{ }\NormalTok{(grid_df[,}\DecValTok{2}\NormalTok{] -}\StringTok{ }\NormalTok{grid_df[,}\DecValTok{1}\NormalTok{]) /}\StringTok{ }\NormalTok{h.MS}
-        
-        \NormalTok{grid_df[,}\DecValTok{3}\NormalTok{] <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h.SROT)) *}\StringTok{ }\KeywordTok{Knorm}\NormalTok{(newx.hsrot)}
-        \NormalTok{grid_df[,}\DecValTok{4}\NormalTok{] <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h.SJ)) *}\StringTok{ }\KeywordTok{Knorm}\NormalTok{(newx.hsj)}
-        \NormalTok{grid_df[,}\DecValTok{5}\NormalTok{] <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h.LSCV)) *}\StringTok{ }\KeywordTok{Knorm}\NormalTok{(newx.hLSCV)}
-        \NormalTok{grid_df[,}\DecValTok{6}\NormalTok{] <-}\StringTok{ }\NormalTok{(}\DecValTok{1} \NormalTok{/}\StringTok{ }\NormalTok{(n *}\StringTok{ }\NormalTok{h.MS)) *}\StringTok{ }\KeywordTok{Knorm}\NormalTok{(newx.hMS)}
-        
-        \KeywordTok{names}\NormalTok{(grid_df) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}
-            \StringTok{"X_act"}\NormalTok{, }
-            \StringTok{"X_grid"}\NormalTok{, }
-            \StringTok{'kde_hSROT'}\NormalTok{,}
-            \StringTok{'kde_hSJ'}\NormalTok{,}
-            \StringTok{'kde_hLSCV'}\NormalTok{,}
-            \StringTok{'kde_hMS'}
-        \NormalTok{)}
-        
-        \NormalTok{sum_results <-}\StringTok{ }
-\StringTok{            }\NormalTok{grid_df %>%}
-\StringTok{            }\KeywordTok{group_by}\NormalTok{(X_grid) %>%}
-\StringTok{            }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{kde_hSROT =} \KeywordTok{sum}\NormalTok{(kde_hSROT),}
-                      \DataTypeTok{kde_hSJ =} \KeywordTok{sum}\NormalTok{(kde_hSJ),}
-                      \DataTypeTok{kde_hLSCV =} \KeywordTok{sum}\NormalTok{(kde_hLSCV),}
-                      \DataTypeTok{kde_hMS =} \KeywordTok{sum}\NormalTok{(kde_hMS))}
-    \NormalTok{\}}
-    
-    \NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{()+}
-\StringTok{        }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NULL}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{x, }\DataTypeTok{y =} \NormalTok{..density..),}
-                       \DataTypeTok{bins =} \FloatTok{1.4} \NormalTok{*}\StringTok{ }\KeywordTok{ceiling}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(n)),}
-                       \DataTypeTok{fill =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{colour =} \StringTok{'black'}\NormalTok{)+}
-\StringTok{        }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =} \NormalTok{sum_results, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{X_grid, }\DataTypeTok{y =} \NormalTok{kde_hSROT,}
-                                          \DataTypeTok{colour =} \KeywordTok{paste}\NormalTok{(}\StringTok{'SROT:'}\NormalTok{, }\KeywordTok{round}\NormalTok{(h.SROT, }\DecValTok{2}\NormalTok{))))+}
-\StringTok{        }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =} \NormalTok{sum_results, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{X_grid, }\DataTypeTok{y =} \NormalTok{kde_hSJ,}
-                                          \DataTypeTok{colour =} \KeywordTok{paste}\NormalTok{(}\StringTok{'SJ:'}\NormalTok{, }\KeywordTok{round}\NormalTok{(h.SJ, }\DecValTok{2}\NormalTok{))))+}
-\StringTok{        }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =} \NormalTok{sum_results, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{X_grid, }\DataTypeTok{y =} \NormalTok{kde_hLSCV,}
-                                          \DataTypeTok{colour =} \KeywordTok{paste}\NormalTok{(}\StringTok{'LSCV:'}\NormalTok{, }\KeywordTok{round}\NormalTok{(h.LSCV, }\DecValTok{2}\NormalTok{)))) +}
-\StringTok{        }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data =} \NormalTok{sum_results, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{X_grid, }\DataTypeTok{y =} \NormalTok{kde_hMS,}
-                                          \DataTypeTok{colour =} \KeywordTok{paste}\NormalTok{(}\StringTok{'MS:'}\NormalTok{, }\KeywordTok{round}\NormalTok{(h.MS, }\DecValTok{2}\NormalTok{))))+}
-\StringTok{        }\KeywordTok{xlab}\NormalTok{(}\StringTok{'X'}\NormalTok{) +}\StringTok{ }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Density'}\NormalTok{)+}
-\StringTok{        }\KeywordTok{theme_bw}\NormalTok{()+}
-\StringTok{        }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{panel.grid =} \KeywordTok{element_blank}\NormalTok{())+}
-\StringTok{        }\KeywordTok{scale_colour_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{'Set1'}\NormalTok{,}
-                            \DataTypeTok{name =} \StringTok{'Bandwidth'}\NormalTok{)}
-    \KeywordTok{plot}\NormalTok{(p1)}
-    \NormalTok{if(give_dens)\{}
-        \KeywordTok{return}\NormalTok{(sum_results)}
-    \NormalTok{\}}
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
 
 \subsection{Expression for Sheather-Jones
 Bandwidth}\label{expression-for-sheather-jones-bandwidth}
