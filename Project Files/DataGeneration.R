@@ -44,6 +44,7 @@ x_1 <- beer_data[!is.na(beer_data$ABV), ]$ABV
 library(rvest)
 pga1986 <- read_html('http://www.pgatour.com/stats/stat.101.1986.html')
 pga1996 <- read_html('http://www.pgatour.com/stats/stat.101.1996.html')
+pga2006 <- read_html('http://www.pgatour.com/stats/stat.101.2006.html')
 pga2015 <- read_html('http://www.pgatour.com/stats/stat.101.2015.html')
 
 dd1986 <- pga1986 %>% 
@@ -56,9 +57,17 @@ dd1996 <- pga1996 %>%
     .[2] %>%
     html_table(., header = TRUE)
 
+dd2006 <- pga2006 %>% 
+    html_nodes('table') %>%
+    .[2] %>%
+    html_table(., header = TRUE)
+
 dd2015 <- pga2015 %>%
     html_nodes('table') %>%
     .[2] %>%
     html_table(., header = TRUE)
 
-dd <- c(dd1986[[1]]$AVG., dd1996[[1]]$AVG., dd2015[[1]]$AVG.)
+dd <- c(dd1986[[1]]$AVG., 
+        dd1996[[1]]$AVG., 
+        dd2006[[1]]$AVG.,
+        dd2015[[1]]$AVG.)
