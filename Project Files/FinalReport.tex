@@ -341,7 +341,7 @@ h_{AMISE} &= \left(\frac{R(K)}{n\sigma_K^4R(f^{''})}\right)^{\frac{1}{5}}.
 \]
 
 All of the components of \(h_{AMISE}\) are known to us, except for
-\(R(f^{''})\). \(R(f^{''})\) posseses a key to determining an
+\(R(f^{''})\). \(R(f^{''})\) possesses a key to determining an
 appropriate bandwidth. Of \(R(f^{''})\), Sheather (2004, 589) states:
 
 \begin{quote}
@@ -653,7 +653,7 @@ density estimate provided by \(h_{LSCV}\) is far too wiggly to be useful
 for a data analyst. We also see that \(h_{MS}\) provides a much smoother
 estimate than the those proposed by Silverman and Sheather and Jones, it
 seems that it is too conservative. The best bandwidth would take a value
-somewhere in the neighbordhood of \(h_{SJ}\) and \(h_{SROT}\).
+somewhere in the neighborhood of \(h_{SJ}\) and \(h_{SROT}\).
 
 \newpage
 
@@ -749,6 +749,38 @@ Interval}\label{approximate-confidence-interval}
 \includegraphics{FinalReport_files/figure-latex/unnamed-chunk-15-2.pdf}
 
 \section{Appendix}\label{appendix}
+
+\subsection{Shiny App Screenshots}\label{shiny-app-screenshots}
+
+To visit the Shiny app,
+\textbf{\href{https://bgstieber.shinyapps.io/kdeshinyapp/}{click this
+link}}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot1.png}
+\caption{Shiny app example of kernel density estimation using a normal distribution with the Sheather-Jones, Silverman, and CV bandwidths.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot2.png}
+\caption{Shiny app example of kernel density estimation using an equal mixture of gamma densities with the Sheather-Jones, CV, and Maximal Smoothing bandwidths.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot3.png}
+\caption{Shiny app example of kernel density estimation with a bootstrapped pointwise interval on BeerAdvocate's ABV data. }
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot4.png}
+\caption{Shiny app example of kernel density estimation with a pointwise confidence interval using the approximate variance calculation. The data we are visualizing are the average driving distances of PGA Tour players for 1986, 1996, and 2015.}
+\end{figure}
+
+\pagebreak
 
 \subsection{Expression for Sheather-Jones
 Bandwidth}\label{expression-for-sheather-jones-bandwidth}

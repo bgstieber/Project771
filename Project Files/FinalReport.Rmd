@@ -213,7 +213,7 @@ h_{AMISE} &= \left(\frac{R(K)}{n\sigma_K^4R(f^{''})}\right)^{\frac{1}{5}}.
 \end{aligned}
 $$
 
-All of the components of $h_{AMISE}$ are known to us, except for $R(f^{''})$. $R(f^{''})$ posseses a key to determining an appropriate bandwidth. Of $R(f^{''})$, @Sheather2004[p. 589] states:
+All of the components of $h_{AMISE}$ are known to us, except for $R(f^{''})$. $R(f^{''})$ possesses a key to determining an appropriate bandwidth. Of $R(f^{''})$, @Sheather2004[p. 589] states:
 
 > Thus, the functional $R(f^{''})$ is a measure of the underlying roughness or curvature. In particular, the larger the value of $R(f^{''})$ is, the larger is the value of AMISE (i.e., the more difficult it is to estimate $f$) and the smaller is the value of $h_{AMISE}$ (i.e., the smaller the bandwidth needed to capture the curvature in $f$). 
 
@@ -393,7 +393,7 @@ x <- c(rgamma(100, shape = 1, scale = 20),
 kde(x)
 ```
 
-Here we see the excessive variation caused by using $h_{LSCV}$. The density estimate provided by $h_{LSCV}$ is far too wiggly to be useful for a data analyst. We also see that $h_{MS}$ provides a much smoother estimate than the those proposed by Silverman and Sheather and Jones, it seems that it is too conservative. The best bandwidth would take a value somewhere in the neighbordhood of $h_{SJ}$ and $h_{SROT}$.
+Here we see the excessive variation caused by using $h_{LSCV}$. The density estimate provided by $h_{LSCV}$ is far too wiggly to be useful for a data analyst. We also see that $h_{MS}$ provides a much smoother estimate than the those proposed by Silverman and Sheather and Jones, it seems that it is too conservative. The best bandwidth would take a value somewhere in the neighborhood of $h_{SJ}$ and $h_{SROT}$.
 
 \newpage
 \subsection{Example 4: Old Faithful Waiting Time}
@@ -562,9 +562,35 @@ ggplot(app.abv.nrd0, aes(x = grid))+
 
 ```
 
-
 # Appendix
 
+## Shiny App Screenshots
+
+To visit the Shiny app, __[click this link](https://bgstieber.shinyapps.io/kdeshinyapp/)__.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot1.png}
+\caption{Shiny app example of kernel density estimation using a normal distribution with the Sheather-Jones, Silverman, and CV bandwidths.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot2.png}
+\caption{Shiny app example of kernel density estimation using an equal mixture of gamma densities with the Sheather-Jones, CV, and Maximal Smoothing bandwidths.}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot3.png}
+\caption{Shiny app example of kernel density estimation with a bootstrapped pointwise interval on BeerAdvocate's ABV data. }
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{ShinyScreenshot4.png}
+\caption{Shiny app example of kernel density estimation with a pointwise confidence interval using the approximate variance calculation. The data we are visualizing are the average driving distances of PGA Tour players for 1986, 1996, and 2015.}
+\end{figure}
 
 ```{r eval = FALSE, echo = FALSE}
 Knorm <- function(u) dnorm(u)
@@ -666,6 +692,8 @@ kde <- function (x, grid = 512, give_dens = FALSE)
     }
 }
 ```
+
+\pagebreak
 
 ## Expression for Sheather-Jones Bandwidth
 
