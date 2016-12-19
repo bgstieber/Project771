@@ -6,7 +6,7 @@ output:
   pdf_document: 
     keep_tex: yes
 bibliography: library.bib
-abstract: "Univariate kernel density estimation allows an analyst to get a quick glimpse of the distributional properties for some data vector they have in hand. Of utmost importance in kernel density estimation is selecting the bandwidth, which controls the smoothness of the estimate. Insufficient smoothing leads to an estimate which may detect spurious modality, and over-smoothing may obscure important patterns within the data. In this report, we discuss various methods for selecting an optimal bandwidth for univariate kernel density estimation. We discuss Silverman's rule of thumb (1986), a cross-validation technique, Sheather and Jones' plug-in estimator (1991), and Terrell's maximal smoothing principle (1990). We visualize results from univariate density estimation using the different bandwidths for various data vectors, referencing a function written in the R computing environment. We also developed and deployed a Shiny-based web application which provides an interactive summary of some of the important aspects of this report."
+abstract: "Univariate kernel density estimation allows an analyst to get a quick glimpse of the distributional properties for some data vector they have in hand. Of utmost importance in kernel density estimation is selecting the bandwidth, which controls the smoothness of the estimate. Insufficient smoothing leads to an estimate which may detect spurious modality, and over-smoothing may obscure important patterns within the data. In this report, we discuss various methods for selecting an optimal bandwidth for univariate kernel density estimation. We discuss Silverman's rule of thumb (1986), a cross-validation technique, Sheather and Jones' plug-in estimator (1991), and Terrell's maximal smoothing principle (1990). We visualize results from univariate density estimation using the different bandwidths for various data vectors, referencing a function written in the `R` computing environment. We also developed and deployed a __[Shiny-based web application](http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/)__ which provides an interactive summary of some of the important aspects of this report."
 ---
 
 ```{r echo =FALSE, warning=FALSE, message=FALSE}
@@ -330,7 +330,7 @@ We include each $\hat f_h$ on the same graph rather than allowing each $\hat f_h
 
 \subsection{Shiny Web Application}
 
-In addition to the `kde` function, a Shiny-based web application was developed and deployed to http://www.statlab.wisc.edu/shiny/KDEShinyApp/. The application creates density plots for a variety of data choices, and allows the user to investigate different bandwidths for simulated and real-world data sets. The application also allows a user to visualize pointwise confidence intervals for kernel density estimates using the approximate variance (@Jann2007), and a nonparametric bootstrap percentile method. Additionally, the app allows a user to upload a one column `.csv` file and investigate the kernel density estimate as well. Screenshots of the application are in the _Appendix_.
+In addition to the `kde` function, a Shiny-based web application was developed and deployed __[here](http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/)__. The application creates density plots for a variety of data choices, and allows the user to investigate different bandwidths for simulated and real-world data sets. The application also allows a user to visualize pointwise confidence intervals for kernel density estimates using the approximate variance (@Jann2007), and a nonparametric bootstrap percentile method. Additionally, the app allows a user to upload a one column `.csv` file and investigate the kernel density estimate as well. Screenshots of the application are in the _Appendix_.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 library(rvest)
@@ -404,7 +404,7 @@ x_3 <- geyser$waiting #Azzalini, Bowman (1990)
 kde(x_3)
 ```
 
-Using data from @Bowman1990, contained in the __`MASS`__ package, we calculate the kernel density estimate for the waiting time for eruptions from August 1 to August 15, 1985 at the Old Faithful geyser in Yellowstone National Park, Wyoming.
+Using data from @Bowman1990, contained in the __`MASS`__ package [@Venables], we calculate the kernel density estimate for the waiting time for eruptions from August 1 to August 15, 1985 at the Old Faithful geyser in Yellowstone National Park, Wyoming.
 
 Each bandwidth choice seems to capture the bimodality in the distribution of waiting times with varying levels of success. $h_{LSCV}$ may be too aggressive, while $h_{MS}$ does not reach far enough up the left-side peak. $h_{SJ}$ and $h_{LSCV}$ seem grouped together and $h_{SROT}$ and $h_{MS}$ seem grouped together as well. Between $h_{SJ}$ and $h_{LSCV}$, we would want to choose the more conservative bandwidth, which is $h_{SJ}$. Conversely, between $h_{MS}$ and $h_{SROT}$, we would want to choose the more aggressive bandwidth, which is $h_{SROT}$.
 
@@ -566,7 +566,7 @@ ggplot(app.abv.nrd0, aes(x = grid))+
 
 ## Shiny App Screenshots
 
-To visit the Shiny app, __[click this link](http://www.statlab.wisc.edu/shiny/KDEShinyApp/)__.
+To visit the Shiny app, __[click this link](http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/)__.
 
 \begin{figure}[htbp]
 \centering

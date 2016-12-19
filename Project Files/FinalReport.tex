@@ -139,9 +139,11 @@ Silverman's rule of thumb (1986), a cross-validation technique, Sheather
 and Jones' plug-in estimator (1991), and Terrell's maximal smoothing
 principle (1990). We visualize results from univariate density
 estimation using the different bandwidths for various data vectors,
-referencing a function written in the R computing environment. We also
-developed and deployed a Shiny-based web application which provides an
-interactive summary of some of the important aspects of this report.
+referencing a function written in the \texttt{R} computing environment.
+We also developed and deployed a
+\textbf{\href{http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/}{Shiny-based
+web application}} which provides an interactive summary of some of the
+important aspects of this report.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
@@ -586,16 +588,16 @@ should allow for effective comparisons between the \(\hat f_h\)'s.
 \subsection{Shiny Web Application}
 
 In addition to the \texttt{kde} function, a Shiny-based web application
-was developed and deployed to
-\url{http://www.statlab.wisc.edu/shiny/KDEShinyApp/}. The application
-creates density plots for a variety of data choices, and allows the user
-to investigate different bandwidths for simulated and real-world data
-sets. The application also allows a user to visualize pointwise
-confidence intervals for kernel density estimates using the approximate
-variance (Jann (2007)), and a nonparametric bootstrap percentile method.
-Additionally, the app allows a user to upload a one column \texttt{.csv}
-file and investigate the kernel density estimate as well. Screenshots of
-the application are in the \emph{Appendix}.
+was developed and deployed
+\textbf{\href{http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/}{here}}.
+The application creates density plots for a variety of data choices, and
+allows the user to investigate different bandwidths for simulated and
+real-world data sets. The application also allows a user to visualize
+pointwise confidence intervals for kernel density estimates using the
+approximate variance (Jann (2007)), and a nonparametric bootstrap
+percentile method. Additionally, the app allows a user to upload a one
+column \texttt{.csv} file and investigate the kernel density estimate as
+well. Screenshots of the application are in the \emph{Appendix}.
 
 \subsection{Example 1: 300 samples from $N(2, 2^2)$}
 
@@ -667,9 +669,10 @@ somewhere in the neighborhood of \(h_{SJ}\) and \(h_{SROT}\).
 \begin{center}\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 Using data from Azzalini and Bowman (1990), contained in the
-\textbf{\texttt{MASS}} package, we calculate the kernel density estimate
-for the waiting time for eruptions from August 1 to August 15, 1985 at
-the Old Faithful geyser in Yellowstone National Park, Wyoming.
+\textbf{\texttt{MASS}} package (Venables and Ripley 2003), we calculate
+the kernel density estimate for the waiting time for eruptions from
+August 1 to August 15, 1985 at the Old Faithful geyser in Yellowstone
+National Park, Wyoming.
 
 Each bandwidth choice seems to capture the bimodality in the
 distribution of waiting times with varying levels of success.
@@ -753,8 +756,8 @@ Interval}\label{approximate-confidence-interval}
 \subsection{Shiny App Screenshots}\label{shiny-app-screenshots}
 
 To visit the Shiny app,
-\textbf{\href{http://www.statlab.wisc.edu/shiny/KDEShinyApp/}{click this
-link}}.
+\textbf{\href{http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/}{click
+this link}}.
 
 \begin{figure}[htbp]
 \centering
@@ -866,6 +869,11 @@ Terrell, George R. 1990. ``The Maximal Smoothing Principle in Density
 Estimation.'' \emph{Journal of the American Statistical Association} 85
 (410): 470--77.
 doi:\href{https://doi.org/10.2307/2289786}{10.2307/2289786}.
+
+\hypertarget{ref-Venables}{}
+Venables, W. N., and B. D. Ripley. 2003. \emph{Modern Applied Statistics
+With S}. 4th ed. Vol. 45. 1. Springer.
+doi:\href{https://doi.org/10.1198/tech.2003.s33}{10.1198/tech.2003.s33}.
 
 
 \end{document}
