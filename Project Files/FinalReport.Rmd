@@ -330,7 +330,7 @@ We include each $\hat f_h$ on the same graph rather than allowing each $\hat f_h
 
 \subsection{Shiny Web Application}
 
-In addition to the `kde` function, a Shiny-based web application was developed and deployed to https://bgstieber.shinyapps.io/kdeshinyapp/. The application creates density plots for a variety of data choices, and allows the user to investigate different bandwidths for simulated and real-world data sets. The application also allows a user to visualize pointwise confidence intervals for kernel density estimates using the approximate variance (@Jann2007), and a nonparametric bootstrap percentile method. Additionally, the app allows a user to upload a one column `.csv` file and investigate the kernel density estimate as well. Screenshots of the application are in the _Appendix_.
+In addition to the `kde` function, a Shiny-based web application was developed and deployed to http://www.statlab.wisc.edu/shiny/KDEShinyApp/. The application creates density plots for a variety of data choices, and allows the user to investigate different bandwidths for simulated and real-world data sets. The application also allows a user to visualize pointwise confidence intervals for kernel density estimates using the approximate variance (@Jann2007), and a nonparametric bootstrap percentile method. Additionally, the app allows a user to upload a one column `.csv` file and investigate the kernel density estimate as well. Screenshots of the application are in the _Appendix_.
 
 ```{r echo = FALSE, warning = FALSE, message = FALSE}
 library(rvest)
@@ -566,7 +566,7 @@ ggplot(app.abv.nrd0, aes(x = grid))+
 
 ## Shiny App Screenshots
 
-To visit the Shiny app, __[click this link](https://bgstieber.shinyapps.io/kdeshinyapp/)__.
+To visit the Shiny app, __[click this link](http://www.statlab.wisc.edu/shiny/KDEShinyApp/)__.
 
 \begin{figure}[htbp]
 \centering
