@@ -141,8 +141,8 @@ principle (1990). We visualize results from univariate density
 estimation using the different bandwidths for various data vectors,
 referencing a function written in the \texttt{R} computing environment.
 We also developed and deployed a
-\textbf{\href{http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/}{Shiny-based
-web application}} which provides an interactive summary of some of the
+\href{http://www.statlab.wisc.edu/shiny/Bandwidths_For_UnivariateKDE/}{Shiny-based
+web application} which provides an interactive summary of some of the
 important aspects of this report.
 \end{abstract}
 
@@ -187,10 +187,12 @@ is a kernel function which satisfies \(\int{K(x)dx} = 1\). In general,
 The kernel function is generally chosen to be a unimodal probability
 density function that is symmetric around zero. Popular choices include
 the Gaussian kernel (\(K(x) = \phi(x)\)), the Epanechnikov kernel
-(\(K(x) = \frac{3}{4}(1-x^2)*\mathbb{I}(|x| <1)\)), and the triangular
-kernel (\(K(x) = (1 - |x|)*\mathbb{I}(|x| < 1)\)). Provided the kernel
-function \(K(x)\) satisfies the aforementioned conditions, the choice of
-kernel will not be as important the selection of a bandwidth.
+(\(K(x) = \frac{3}{4}(1-x^2)*\mathbb{I}(\left|x \right| <1)\)), and the
+triangular kernel
+(\(K(x) = (1 - \left|x\right|)*\mathbb{I}(\left|x\right| < 1)\)).
+Provided the kernel function \(K(x)\) satisfies the aforementioned
+conditions, the choice of kernel will not be as important the selection
+of a bandwidth.
 
 \begin{figure}[htbp]
 \centering
@@ -244,7 +246,7 @@ observations from \(N(0,1)\), which are the red triangles in the plot.
 Using a Gaussian kernel, we compute the densities (scaled by \(1/nh\))
 for each \(x\), which are the solid blue curves in the plot. We then sum
 across these pointwise densities and are left with our final KDE, which
-is the dashed black curve. We have provided plots for a large bandwidth
+is the thick black curve. We have provided plots for a large bandwidth
 and a small bandwidth, demonstrating the micro and macro effects of
 bandwidth selection.
 
@@ -254,7 +256,7 @@ bandwidth selection.
 
 }
 
-\caption{Demonstration of KDE computation. Red triangles are 10 i.i.d. data points from N(0,1). The solid blue lines are scaled densities at each data point. The dashed black line is the final KDE. Left panel uses a large bandwidth (more smoothing), right panel uses a small bandwidth (less smoothing).}\label{fig:unnamed-chunk-4}
+\caption{Demonstration of KDE computation. Red triangles are 10 i.i.d. data points from N(0,1). The solid blue lines are scaled densities at each data point. The thick black line is the final KDE. Left panel uses a large bandwidth (more smoothing), right panel uses a small bandwidth (less smoothing).}\label{fig:unnamed-chunk-4}
 \end{figure}
 
 \subsection{Evaluating $\widehat{f}_h(x)$ as an Estimator}
@@ -292,11 +294,11 @@ perfomance on average over many data sets.
 
 Givens and Hoeting (2013, 331) derived \(E[\widehat{f_h}(x)]\) as:
 
-\[E[\widehat{f_h}(x)] = f(x) + \frac{1}{2} \sigma_K^2f^{''}(x) + o(h^2),\]
+\[E[\widehat{f_h}(x)] = f(x) + \frac{1}{2} h^2 \sigma_K^2f^{''}(x) + o(h^2),\]
 
 where \(\sigma_K^2\) is the variance of \(K\) (\(\int z^2 K(z) dz\)). So
 that
-\(\left(bias(\widehat{f_h}(x))\right)^2 = \frac{1}{4}\sigma_K^4 (f^{''})^2 + o(h^4)\),
+\(\left(bias(\widehat{f_h}(x))\right)^2 = \frac{1}{4} h^4\sigma_K^4 (f^{''})^2 + o(h^4)\),
 and integrating \(bias^2\) results in:
 
 \[\int bias\left(\hat{f}(x)\right)^2 dx = \frac{1}{4} h^4 \sigma_K^4 R(f^{''}) + o(h^4),\]
@@ -413,8 +415,8 @@ squared error. When we refer to the cross-validated bandwidth selector,
 we denote the bandwidth as \(h_{LSCV}\).
 
 For this report, we have focused on the Gaussian kernel. \(UCV(h)\) has
-a straightforward expression (equation 10.23, Givens and Hoeting (2013,
-333)) when a Gaussian kernel is used, which makes the computation of
+a straightforward expression when a Gaussian kernel is used (equation
+10.23, Givens and Hoeting (2013, 333)), which makes the computation of
 \(h_{LSCV}\) rather tidy.
 
 The unbiasedness of the objective function is a nice feature, but it
@@ -498,7 +500,9 @@ only unknown quantity in the expression for \(h_{AMISE}\). After
 plugging in the estimator for \(R(f^{''})\) in the expression for
 \(h_{AMISE}\), we arrive at the Sheather-Jones bandwidth. An expression
 for the optimal bandwidth when \(L = \phi\) is in the Appendix. This
-expression requires a root-finding scheme such as Newton's method.
+expression requires a root-finding scheme such as Newton's method. In
+\texttt{R}, a user can obtain \(h_{SJ}\) for a data vector \texttt{x} by
+writing \texttt{bw.SJ(x)}.
 
 In simulation studies (summarized in Jones, Marron, and Sheather
 (1996)), it was seen that \(h_{SJ}\) tended to be superior to both
@@ -552,10 +556,10 @@ Function}{Examples Using the kde Function}}\label{examples-using-the-kde-functio
 
 To examine the four bandwidth selection methods we have investigated, we
 use four different data vectors to investigate the changes in density
-estimation as the data deviates from the normal distribution. Two
-vectors are simulated, and two vectors are from real data
-sets.\footnote{The \texttt{R} code used to generate the data can be
-  found on the author's Github:
+estimation as the data deviates from the normal distribution. Three
+vectors are simulated, and one vector is from a real data set.\footnote{The
+  \texttt{R} code used to generate the data can be found on the author's
+  Github:
   \url{https://github.com/bgstieber/Project771/blob/master/Project\%20Files/DataGeneration.R}}
 Our main interest is on if the bandwidth options lead to under-smoothing
 or over-smoothing of the data.
@@ -669,7 +673,7 @@ somewhere in the neighborhood of \(h_{SJ}\) and \(h_{SROT}\).
 \begin{center}\includegraphics{FinalReport_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 Using data from Azzalini and Bowman (1990), contained in the
-\textbf{\texttt{MASS}} package (Venables and Ripley 2003), we calculate
+\textbf{\texttt{MASS}} package (Venables and Ripley 2002), we calculate
 the kernel density estimate for the waiting time for eruptions from
 August 1 to August 15, 1985 at the Old Faithful geyser in Yellowstone
 National Park, Wyoming.
@@ -693,14 +697,14 @@ that oversmooth (\(h_{MS}\)), and bandwidths that under-smooth
 found, which makes selecting a bandwidth an iterative and subjective
 process.
 
-A safe option for a novice data analyst is to use at least two
-bandwidths when analyzing the data. One bandwidth should have the
-tendency to under-smooth (e.g. \(h_{SROT}\) or \(h_{MS}\)), and another
-bandwidth should produce estimates that are more wiggly (e.g.
-\(h_{SJ}\), \textbf{but not \(h_{LSCV}\)}). If visualizing is the goal
-(rather than simulation), then including a histogram will provide even
-more clarity when making density plots (note that making a histogram
-also requires selecting a bandwidth, though).
+A safe option for a data analyst is to use at least two bandwidths when
+analyzing the data. One bandwidth should have the tendency to
+under-smooth (e.g. \(h_{SROT}\) or \(h_{MS}\)), and another bandwidth
+should produce estimates that are more wiggly (e.g. \(h_{SJ}\),
+\textbf{but not \(h_{LSCV}\)}). If visualizing is the goal (rather than
+simulation), then including a histogram will provide even more clarity
+when making density plots (note that making a histogram also requires
+selecting a bandwidth, though).
 
 In our \emph{Examples} section, we saw the devastating effects of
 over-smoothing and under-smoothing. There is a large amount of
@@ -718,9 +722,10 @@ Using the \texttt{density} function and the beer data
 (\texttt{abv.complete}, which are the alcohol by volume measures for the
 top 250 beers as rated by BeerAdvocate.com) provided below, compute and
 plot a 95\% pointwise bootstrapped percentile interval. Additionally,
-use the approximate variance function \(\tilde{V}\) given by Jann (2007,
-2) to compute and plot a 95\% pointwise confidence interval. Create two
-plots for each method using \texttt{bw.SJ} and \texttt{bw.nrd0}.
+use the approximate variance function \(\tilde{V}\) given below and
+found in Jann (2007, 2) to compute and plot a 95\% pointwise confidence
+interval. Create two plots for each method using \texttt{bw.SJ} and
+\texttt{bw.nrd0}.
 
 \[\tilde{V}\left(\widehat{f_K}(x;h)\right) = \frac{1}{nh}R(K) \widehat{f_K}(x;h) - \frac{1}{n} \widehat{f_K}(x;h)^2\]
 
@@ -819,9 +824,10 @@ the root-finding.
 
 \hypertarget{refs}{}
 \hypertarget{ref-Bowman1990}{}
-Azzalini, A, and A Bowman. 1990. ``A Look at Some Data on the Old
-Faithful Geyer.'' \emph{Journal of the Royal Statistical Society} 39
+Azzalini, A, and A Bowman. 1990. ``A look at some data on the Old
+Faithful geyser.'' \emph{Journal of the Royal Statistical Society} 39
 (3): 357--65.
+doi:\href{https://doi.org/10.2307/2347385}{10.2307/2347385}.
 
 \hypertarget{ref-Givens2013}{}
 Givens, Geof, and Jennifer Hoeting. 2013. \emph{Computational
@@ -841,23 +847,23 @@ Jann, Ben. 2007. ``Univariate kernel density estimation.''
 
 \hypertarget{ref-Jones1992}{}
 Jones, M. C., J. S. Marron, and Simon J. Sheather. 1992. ``Progress in
-data-based bandwidth selection for Kernel density estimation.''
+data-based bandwidth selection for kernel density estimation.''
 \emph{Computational Statistics} 11 (3): 337--81.
 
 \hypertarget{ref-Jones1996}{}
----------. 1996. ``A Brief Survey of Bandwidth Selection for Density
-Estimation.'' \emph{Journal of the American Statistical Association} 91
+---------. 1996. ``A brief survey of bandwidth belection for density
+estimation.'' \emph{Journal of the American Statistical Association} 91
 (433): 401--7.
 doi:\href{https://doi.org/10.1080/01621459.1996.10476701}{10.1080/01621459.1996.10476701}.
 
 \hypertarget{ref-Sheather2004}{}
-Sheather, Simon J. 2004. ``Density Estimation.'' \emph{Stat. Sci.} 19
-(4): 588--97.
+Sheather, Simon J. 2004. ``Density estimation.'' \emph{Statistical
+Science} 19 (4): 588--97.
 doi:\href{https://doi.org/10.1214/088342304000000297}{10.1214/088342304000000297}.
 
 \hypertarget{ref-Sheather1991}{}
-Sheather, Simon J., and M. C. Jones. 1991. ``A Reliable Data-Based
-Bandwidth Selection Method for Kernel Density Estimation.''
+Sheather, Simon J., and M. C. Jones. 1991. ``A reliable data-based
+bandwidth selection method for kernel density estimation.''
 \emph{Journal of the Royal Statistical Society} 53 (3): 683--90.
 
 \hypertarget{ref-Silverman1986}{}
@@ -865,15 +871,14 @@ Silverman, Bernard W. 1986. \emph{Density Estimation for Statistics and
 Data Analysis}. CRC press.
 
 \hypertarget{ref-Terrell1990}{}
-Terrell, George R. 1990. ``The Maximal Smoothing Principle in Density
-Estimation.'' \emph{Journal of the American Statistical Association} 85
+Terrell, George R. 1990. ``The maximal smoothing principle in density
+estimation.'' \emph{Journal of the American Statistical Association} 85
 (410): 470--77.
 doi:\href{https://doi.org/10.2307/2289786}{10.2307/2289786}.
 
 \hypertarget{ref-Venables}{}
-Venables, W. N., and B. D. Ripley. 2003. \emph{Modern Applied Statistics
-With S}. 4th ed. Vol. 45. 1. Springer.
-doi:\href{https://doi.org/10.1198/tech.2003.s33}{10.1198/tech.2003.s33}.
+Venables, W. N., and B. D. Ripley. 2002. \emph{Modern Applied Statistics
+with S}. 4th ed. Springer. \url{http://www.stats.ox.ac.uk/pub/MASS4}.
 
 
 \end{document}
