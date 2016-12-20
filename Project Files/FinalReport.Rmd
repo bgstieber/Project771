@@ -95,13 +95,13 @@ legend('topright', bty = 'n',
 
 ```
 
-We have provided three density estimates in Figure 2, each using a Gaussian kernel, but different bandwidths. The lighter solid line is too small of a bandwidth ($h$ = 0.2), as it is too sensitive to local perturbations. The dashed line is too large of a bandwidth ($h$ = 2), so it over-smooths the interesting components of the distribution. The heavy line ($h$ = 0.6) seems to be a fairly respectable bandwidth; it does not over-smooth the data, and it also highlights some of the interesting features of the data. 
+We have provided three density estimates in Figure 2, each using a Gaussian kernel, but different bandwidths. The lighter solid line is too small of a bandwidth ($h$ = 0.2), as it is too sensitive to local perturbations. The dashed line is too large of a bandwidth ($h$ = 2.1), so it over-smooths the interesting components of the distribution. The heavy line ($h$ = 0.6) seems to be a fairly respectable bandwidth; it does not over-smooth the data, and it also highlights some of the interesting features of the data. 
 
 \newpage
 
 # Methods for evaluating KDE
 
-To calculate $\widehat{f_h}(x)$, we need to compute an estimate for every observation $x_i$, based on the $n-1$ remaining observations in the data. This computation requires $n (n-1)$ computations to calculate the final estimate. To get around such a computationally intensive calculation, techniques such as linear binning and Fast Fourier Transforms are used (both are implemented in `R`'s `density` function).
+To calculate $\widehat{f_h}(x)$, we need to compute an estimate for every observation $x_i$, based on the $n-1$ remaining observations in the data. This calculation requires $n (n-1)$ computations to find the final estimate. To get around such a computationally intensive task, techniques such as linear binning and Fast Fourier Transforms are used (both are implemented in `R`'s `density` function).
 
 Computing the kernel density estimator amounts to piling up mass around each $x$, then summing the mass up over $x_1, x_2, \ldots, x_n$. Figure 3 demonstrates this computation. We start with 10 i.i.d. observations from $N(0,1)$, which are the red triangles in the plot. Using a Gaussian kernel, we compute the densities (scaled by $1/nh$) for each $x$, which are the solid blue curves in the plot. We then sum across these pointwise densities and are left with our final KDE, which is the thick black curve. We have provided plots for a large bandwidth and a small bandwidth, demonstrating the micro and macro effects of bandwidth selection.
 
@@ -158,7 +158,7 @@ points(kCenter, rep(-.0101, n), col = 'red', pch = 2)
 
 \subsection{Evaluating $\widehat{f}_h(x)$ as an Estimator}
 
-Along with the computation of $\widehat{f_h}(x)$, it is also important to assess the quality of $\hat{f}$ as an estimator of $f$. One choice would the be the Integrated Squared Error (ISE):
+Along with the computation of $\widehat{f_h}(x)$, it is also important to assess the quality of $\hat{f}$ as an estimator of $f$. One choice would be the Integrated Squared Error (ISE):
 
 $$ISE(h) = \int_{-\infty}^{\infty} \left(\hat{f}(x) - f(x)\right)^2dx.$$
 ISE calculates the squared error for _this_ sample. It might be reasonable to average ISE over _all_ samples, resulting in Mean Integrated Squared Error (MISE): $MISE(h) = E\left(ISE(h)\right).$
@@ -171,7 +171,7 @@ and decompose $MSE$ as $MSE = bias^2 + var$:
 $$MISE(h) = \int_{-\infty}^{\infty} var\left(\widehat{f_h}(x)\right) + bias\left(\widehat{f_h}(x)\right)^2 dx.$$
 @Givens2013[p. 327] say of the distinction between $ISE$ and $MISE$^[The reader may be interested in our focus on squared error, instead of opting for the $L_1$ norm. While the $L_1$ norm is theoretically appealing, due to its invariance under one-to-one smooth transformations, it can be somewhat difficult to analyze mathematically. For this reason it is neglected here.]:
 
-> The distinction is essentially one between the statistical concepts of loss and risk. Using ISE(h) is conceptually appealing because it assesses the estimator's performance with the observed data. However, focusing on MISE(h) is an effective way to approximate ISE-based evaluation while reflecting the sensible goal of seeking optimal perfomance on average over many data sets.
+> The distinction is essentially one between the statistical concepts of loss and risk. Using ISE(h) is conceptually appealing because it assesses the estimator's performance with the observed data. However, focusing on MISE(h) is an effective way to approximate ISE-based evaluation while reflecting the sensible goal of seeking optimal performance on average over many data sets.
 
 @Givens2013[p. 331] derived $E[\widehat{f_h}(x)]$ as:
 
@@ -183,7 +183,7 @@ $$\int bias\left(\hat{f}(x)\right)^2 dx = \frac{1}{4} h^4 \sigma_K^4 R(f^{''}) +
 
 where $R$ is a measure of the roughness of a function g:
 
-$$R(g) = \int_{-\infty}^{\infty}g^2(z) dz.$$
+$$R(g) = \int_{-\infty}^{\infty}g^2\left(z\right) dz.$$
 
 It can also be shown that $var\left(\hat{f}(x)\right) = \frac{1}{nh}f(x)R(K) + o(\frac{1}{nh})$, and integrating $var$ results in:
 
@@ -219,7 +219,7 @@ All of the components of $h_{AMISE}$ are known to us, except for $R(f^{''})$. $R
 
 # Bandwidth Selection
 
-The possible choices for bandwidth depend on navigating around the fact that $R(f^{''})$ is unknown. We investigate four bandwidth selection strategies which employ different methods to circumvent not knowing $R(f^{''})$.
+The possible choices for bandwidth depend on navigating around the fact that $R(f^{''})$ is unknown. We investigate four bandwidth selection strategies which employ different methods to circumvent not knowing $R(f^{''})$:
 
 - Cross validation: choose a different objective function based on $ISE$, and use a leave one out (LOO) cross validation estimator to find $\int \hat{f}_h f$
 
@@ -235,7 +235,7 @@ The possible choices for bandwidth depend on navigating around the fact that $R(
 We can represent integrated squared error as:
 
 $$
-ISE(h) = \int \left(\hat{f}_h - f\right) = \int\hat{f}_h^2 - 2\int \hat{f}_hf + \int f^2.
+ISE(h) = \int \left(\hat{f}_h - f\right)^2 = \int\hat{f}_h^2 - 2\int \hat{f}_hf + \int f^2.
 $$
 
 In $ISE(h)$, only the first two terms rely on $h$, and the first term is entirely known. We can estimate the second term ($2\int \hat{f}_hf = 2 E(\hat{f}_h)$) using $2/n \sum_{i=1}^{n}\hat{f}_{-i}(x_i)$. Where
@@ -244,7 +244,7 @@ $$
 \hat{f}_{-i}(x_i) = \frac{1}{h(n-1)}\sum_{j \neq i} K\left(\frac{x_i - x_j}{h}\right)
 $$
 
-is the leave-one-out kernel density estimator at $x_i$ using all of the data except $x_i$.
+is the leave-one-out kernel density estimator at $x_i$ using all of the data _except_ $x_i$.
 
 We then attempt to minimize
 
@@ -257,7 +257,7 @@ $UCV(h)$ is called the "unbiased cross-validation" criterion because $E\left[UCV
 
 For this report, we have focused on the Gaussian kernel. $UCV(h)$ has a straightforward expression when a Gaussian kernel is used (equation 10.23, @Givens2013[p. 333]), which makes the computation of $h_{LSCV}$ rather tidy.
 
-The unbiasedness of the objective function is a nice feature, but it comes at the cost of imbuing $h_{LSCV}$ with excessive variance [@Jones1992, p. 6]. The objective function $UCV$ tends to depend too heavily on the sample in hand, since it is still random (unlike $MISE$, which is averaged over _all_ samples). The heavy dependence on the data in hand often leads to high variation in $\hat{f}_h$. This excessive variation is displayed in the _Examples_ section of this report.
+The unbiasedness of the objective function is a nice feature, but it comes at the cost of imbuing $h_{LSCV}$ with excessive variance [@Jones1992, p. 6]. The objective function $UCV$ tends to depend too heavily on the sample in hand, since it is still random (unlike $MISE$, which is averaged over _all_ samples). The heavy dependence on the observed data often leads to high variation in $\hat{f}_h$. This excessive variation is displayed in the _Examples_ section of this report.
 
 ##Silverman's Rule of Thumb
 
@@ -306,7 +306,7 @@ In simulation studies (summarized in @Jones1996), it was seen that $h_{SJ}$ tend
 
 ##Terrell's Maximal Smoothing Principle
 
-@Terrell1990 opted for a different approach in determining an optimal bandwidth. Rather than focusing on finding a good estimator of $f''$ or $R(f'')$ in the expression for $h_{AMISE}$, Terrell chose to find some density function $g$ that would minimize $R(g'') = \int (g '' (x))^2 dx$ for a given variance $\sigma^2$. By minimizing $\int (g'')^2$, we could determine an upper bound for $h_{AMISE}$, by using $g$ in place of $f$. @Terrell1990[p. 472] justifies using the maximally smoothed bandwidth, because it avoids the tendency of the under-smoothed density estimate to "display features such as asymmetries and multiple modes that could have come about by chance".
+@Terrell1990 utilized a different approach in determining an optimal bandwidth. Rather than focusing on finding a good estimator of $f''$ or $R(f'')$ in the expression for $h_{AMISE}$, Terrell chose to find some density function $g$ that would minimize $R(g'') = \int (g '' (x))^2 dx$ for a given variance $\sigma^2$. By minimizing $\int (g'')^2$, we could determine an upper bound for $h_{AMISE}$, by using $g$ in place of $f$. @Terrell1990[p. 472] justifies using the maximally smoothed bandwidth, because it avoids the tendency of the under-smoothed density estimate to "display features such as asymmetries and multiple modes that could have come about by chance".
 
 Terrell's estimate is built on the result that the $beta(k + 2, k + 2)$ family minimizes $\int (f^{(k)})^2$ for a given standard deviation [@Terrell1990, p. 471]. For a kernel with variance 1 (e.g. the Gaussian kernel), the maximal smoothing bandwidth is:
 
@@ -366,7 +366,7 @@ x_0 <- rnorm(300, mean = 2, sd = 2)
 kde(x_0)
 ```
 
-We begin by examining $\widehat{f}_h(x)$ for a data vector sampled solely from $N(2, 2^2)$. In this case, we see that each bandwidth selection does a fairly good job of estimating the density. $h_{SROT}$ relies on a normal approximation, so we would expect this bandwidth to perform well on this vector. In fact, it is the most aggressive bandwidth estimator, resulting in the smallest $h$ value of the four. A _best bandwidth_ is not apparent from these results.
+We begin by examining $\widehat{f}_h(x)$ for a data vector sampled solely from $N(2, 2^2)$. In this case, we see that each bandwidth selection method does a fairly good job of estimating the density. $h_{SROT}$ relies on a normal approximation, so we would expect this bandwidth to perform well on this vector. In fact, it is the most aggressive bandwidth estimator, resulting in the smallest $h$ value of the four. A _best bandwidth_ is not apparent from these results.
 
 \newpage
 
@@ -393,10 +393,12 @@ x <- c(rgamma(100, shape = 1, scale = 20),
 kde(x)
 ```
 
-Here we see the excessive variation caused by using $h_{LSCV}$. The density estimate provided by $h_{LSCV}$ is far too wiggly to be useful for a data analyst. We also see that $h_{MS}$ provides a much smoother estimate than the those proposed by Silverman and Sheather and Jones, it seems that it is too conservative. The best bandwidth would take a value somewhere in the neighborhood of $h_{SJ}$ and $h_{SROT}$.
+Here we see the excessive variation caused by using $h_{LSCV}$. The density estimate provided by $h_{LSCV}$ is far too wiggly to be useful for a discerning data analyst. We also see that $h_{MS}$ provides a much smoother estimate than those proposed by Silverman and Sheather and Jones; it seems that it is too conservative. The best bandwidth would take a value somewhere in the neighborhood of $h_{SJ}$ and $h_{SROT}$.
 
 \newpage
 \subsection{Example 4: Old Faithful Waiting Time}
+
+Using data from @Bowman1990, contained in the __`MASS`__ package [@Venables], we calculate the kernel density estimate for the waiting time for eruptions from August 1 to August 15, 1985 at the Old Faithful geyser in Yellowstone National Park, Wyoming.
 
 ```{r echo = FALSE, warning=FALSE, message = FALSE, fig.height=4, fig.width=6.5, fig.align = 'center'}
 library(MASS)
@@ -404,7 +406,6 @@ x_3 <- geyser$waiting #Azzalini, Bowman (1990)
 kde(x_3)
 ```
 
-Using data from @Bowman1990, contained in the __`MASS`__ package [@Venables], we calculate the kernel density estimate for the waiting time for eruptions from August 1 to August 15, 1985 at the Old Faithful geyser in Yellowstone National Park, Wyoming.
 
 Each bandwidth choice seems to capture the bimodality in the distribution of waiting times with varying levels of success. $h_{LSCV}$ may be too aggressive, while $h_{MS}$ does not reach far enough up the left-side peak. $h_{SJ}$ and $h_{LSCV}$ seem grouped together and $h_{SROT}$ and $h_{MS}$ seem grouped together as well. Between $h_{SJ}$ and $h_{LSCV}$, we would want to choose the more conservative bandwidth, which is $h_{SJ}$. Conversely, between $h_{MS}$ and $h_{SROT}$, we would want to choose the more aggressive bandwidth, which is $h_{SROT}$.
 
@@ -412,20 +413,19 @@ Each bandwidth choice seems to capture the bimodality in the distribution of wai
 
 In this report we have presented four options for selecting a bandwidth for univariate kernel density estimation. We have discussed bandwidths that oversmooth ($h_{MS}$), and bandwidths that under-smooth ($h_{LSCV}$). No universally optimal bandwidth selection has been found, which makes selecting a bandwidth an iterative and subjective process. 
 
-A safe option for a data analyst is to use at least two bandwidths when analyzing the data. One bandwidth should have the tendency to under-smooth (e.g. $h_{SROT}$ or $h_{MS}$), and another bandwidth should produce estimates that are more wiggly (e.g. $h_{SJ}$, __but not $h_{LSCV}$__). If visualizing is the goal (rather than simulation), then including a histogram will provide even more clarity when making density plots (note that making a histogram also requires selecting a bandwidth, though).
+A safe option for a data analyst is to use at least two bandwidths when analyzing their data. One bandwidth should have the tendency to over-smooth (e.g. $h_{SROT}$ or $h_{MS}$), and another bandwidth should produce estimates that are more wiggly (e.g. $h_{SJ}$, __but not $h_{LSCV}$__). If visualizing is the goal (rather than simulation), then including a histogram will provide even more clarity when making density plots (note that making a histogram also requires selecting a bandwidth, though).
 
 In our _Examples_ section, we saw the devastating effects of over-smoothing and under-smoothing. There is a large amount of literature on univariate bandwidth selection, but a universally optimal bandwidth has yet to be found. Selecting a bandwidth presents a bias-variance tradeoff to the analyst, with a good bandwidth being dependent on the analytical task. @Sheather2004[p. 596] suggests to "produce a family of density estimates based on a number of values of the bandwidth". We agree with this suggestion, and believe it to be sage advice for exploratory analysis. 
 
 # Question
 
-Using the `density` function and the beer data (`abv.complete`, which are the alcohol by volume measures for the top 250 beers as rated by BeerAdvocate.com) provided below, compute and plot a 95% pointwise bootstrapped percentile interval. Additionally, use the approximate variance function $\tilde{V}$ given below and found in @Jann2007[p. 2] to compute and plot a 95% pointwise confidence interval. Create two plots for each method using `bw.SJ` and `bw.nrd0`. 
+Using the `density` function and the beer data (`abv.complete`, which are the alcohol by volume measures for the top 250 beers as rated on BeerAdvocate.com) provided below, compute and plot a 95% pointwise bootstrapped percentile interval. Additionally, use the approximate variance function $\tilde{V}$ given below and found in @Jann2007[p. 2] to compute and plot a 95% pointwise confidence interval. Create two plots for each method using `bw.SJ` and `bw.nrd0`. 
 
 $$\tilde{V}\left(\widehat{f_K}(x;h)\right) = \frac{1}{nh}R(K) \widehat{f_K}(x;h) - \frac{1}{n} \widehat{f_K}(x;h)^2$$
 
 ```{r message = FALSE, warning=FALSE}
 # data comes from the ABV of beer advocate's top 250 beers for 2016
 # 2 beers have missing abv data
-# quick R script to read in the .csv
 library(RCurl)
 git_file <- 
 getURL("https://raw.githubusercontent.com/bgstieber/Top250Beer/master/Top250Beers.csv")
